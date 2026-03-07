@@ -97,6 +97,11 @@ export default function Comelec() {
     }
   };
 
+  const totalVotes = candidates.reduce(
+    (acc, c) => acc + (c.vote_count || 0),
+    0,
+  );
+
   const fetchCandidates = async () => {
     setIsFetchingCandidates(true);
     try {
@@ -256,7 +261,7 @@ export default function Comelec() {
     if (!isLoggedIn) return;
 
     const channel = supabase
-      .channel("candidates_vote_count")
+      .channel("vote_realtime")
       .on(
         "postgres_changes",
         {
@@ -265,16 +270,21 @@ export default function Comelec() {
           table: "candidates",
         },
         (payload) => {
-          setCandidates((prev) =>
-            prev.map((candidate) =>
-              candidate.id === payload.new.id
-                ? { ...candidate, vote_count: payload.new.vote_count }
-                : candidate,
-            ),
-          );
+          console.log("Realtime Payload Received:", payload);
+          if (payload.new) {
+            setCandidates((prev) =>
+              prev.map((candidate) =>
+                String(candidate.id) === String(payload.new.id)
+                  ? { ...candidate, vote_count: payload.new.vote_count }
+                  : candidate,
+              ),
+            );
+          }
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Realtime Subscription Status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -546,7 +556,9 @@ export default function Comelec() {
               <p className="text-sm font-bold text-slate-400 mb-1">
                 Total Votes
               </p>
-              <h3 className="text-2xl font-bold">856</h3>
+              <h3 className="text-2xl font-bold tabular-nums">
+                {totalVotes.toLocaleString()}
+              </h3>
             </div>
           </div>
           <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">

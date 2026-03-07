@@ -105,7 +105,7 @@ export default function ElectionBallot() {
           </div>
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
             <GraduationCap size={16} />
-            <span>University Student Council 2024</span>
+            <span>University Student Council 2026</span>
           </div>
           <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
@@ -200,6 +200,7 @@ export default function ElectionBallot() {
         ref={progressButtonRef}
         text={"Proceed to Review"}
         navigateTo={"/review"}
+        state={{ selectedCandidates }}
         progress={2}
         disabled={totalSelected < totalPositions}
       />
