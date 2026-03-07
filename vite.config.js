@@ -10,4 +10,15 @@ export default defineConfig({
       "@": path.resolve(new URL(".", import.meta.url).pathname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router"],
+          supabase: ["@supabase/supabase-js"],
+          gsap: ["gsap", "@gsap/react"],
+        },
+      },
+    },
+  },
 });
