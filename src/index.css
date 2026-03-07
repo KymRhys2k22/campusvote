@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Lexend", sans-serif;
+  --color-primary: #009900; /* FEU Green */
+  --color-accent: #ffc20e; /* FEU Gold */
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #101922;
+
+  /* FEU Branding Colors */
+  --color-feu-green: #009900;
+  --color-feu-gold: #ffc20e;
+  --color-feu-gray: #818181;
+  --color-feu-white: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply font-display antialiased;
+  }
+}
+
+.ios-blur {
+  @apply backdrop-blur-md bg-white/80 dark:bg-slate-900/80;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
