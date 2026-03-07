@@ -8,7 +8,7 @@ const ProgressButtonBar = React.forwardRef(
     return (
       <div
         ref={ref}
-        className={`${disabled ? "opacity-0" : ""} fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-background-dark/90 ios-blur border-t border-slate-200 dark:border-slate-800 p-4 pb-8 z-50`}>
+        className="fixed bottom-0 left-0 right-0 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-4 pb-8 z-50 md:rounded-t-full rounded-t-2xl ">
         <div className=" mx-auto max-w-sm flex">
           <button
             onClick={() => navigate(navigateTo)}
@@ -24,7 +24,7 @@ const ProgressButtonBar = React.forwardRef(
               className={`h-full bg-accent ${progress === 1 ? "w-1/4" : progress === 2 ? "w-1/2" : progress === 3 ? "w-full" : "w-0"} rounded-full`}></div>
           </div>
         </div>
-        <p className="text-[10px] text-center text-slate-400 mt-2 font-medium uppercase tracking-widest">
+        <p className="text-[10px]  text-center text-accent/50 mt-2 font-medium uppercase tracking-widest">
           Progress: {progress} of 3 Positions
         </p>
       </div>

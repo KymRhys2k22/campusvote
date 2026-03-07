@@ -9,6 +9,7 @@ import ReviewBallot from "./pages/ReviewBallot.jsx";
 import ElectionResults from "./pages/ElectionResults.jsx";
 import VotingSuccess from "./pages/VotingSuccess.jsx";
 import Comelec from "./pages/Comelec.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
             }
           />
           <Route path="/comelec" element={<Comelec />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>

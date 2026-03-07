@@ -24,7 +24,7 @@ export default function ElectionResults() {
       </div>
 
       <main className="max-w-md mx-auto pb-24">
-        <header className="px-6 pt-6 pb-4">
+        <header className="px-6 pt-6 pb-4 backdrop-blur-md">
           <h1 className="text-2xl font-bold tracking-tight">
             Election Dashboard
           </h1>

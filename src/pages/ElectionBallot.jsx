@@ -10,12 +10,15 @@ import {
 import { supabase } from "../lib/supabase";
 import VoterCandidateCard from "../components/VoterCandidateCard";
 import ProgressButtonBar from "../components/ProgressButtonBar";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export default function ElectionBallot() {
   const [candidates, setCandidates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCandidates, setSelectedCandidates] = useState({}); // { position: candidateId }
   const scrollContainerRefs = useRef({});
+  const progressButtonRef = useRef(null);
 
   const POSITIONS = [
     "President",
@@ -74,13 +77,26 @@ export default function ElectionBallot() {
   ).length;
   const progressPercent =
     totalPositions > 0 ? (totalSelected / totalPositions) * 100 : 0;
-  useEffect(() => {
-    console.log(progressPercent);
+
+  useGSAP(() => {
+    if (progressPercent === 100) {
+      gsap.to(progressButtonRef.current, {
+        yPercent: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    } else {
+      gsap.to(progressButtonRef.current, {
+        yPercent: 120, // ensure it's fully hidden
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    }
   }, [progressPercent]);
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
-      <header className="bg-white/80 dark:bg-background-dark/80 sticky top-0 z-40 ios-blur border-b border-primary/10">
+      <header className=" backdrop-blur-md  sticky top-0 z-40 border-b border-primary/10">
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-xl font-bold tracking-tight">
@@ -181,6 +197,7 @@ export default function ElectionBallot() {
       </main>
 
       <ProgressButtonBar
+        ref={progressButtonRef}
         text={"Proceed to Review"}
         navigateTo={"/review"}
         progress={2}

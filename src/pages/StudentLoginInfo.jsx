@@ -5,12 +5,10 @@ import {
   Mail,
   CheckCircle2,
   AlertCircle,
-  ArrowRight,
   Loader2,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Divider from "../components/Divider";
-import NextButton from "../components/NextButton";
 import ProgressButtonBar from "../components/ProgressButtonBar";
 import gsap from "gsap";
 

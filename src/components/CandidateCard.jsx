@@ -100,7 +100,7 @@ export default function CandidateCard({ candidate }) {
 
       {showDetailModal &&
         createPortal(
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-999 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md animate-in fade-in duration-300">
             <div
               className="absolute inset-0"
               onClick={() => setShowDetailModal(false)}
