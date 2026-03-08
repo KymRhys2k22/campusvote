@@ -3,8 +3,10 @@ import React from "react";
 import { useNavigate } from "react-router";
 
 const ProgressButtonBar = React.forwardRef(
-  ({ navigateTo, progress, disabled, text, state }, ref) => {
+  ({ navigateTo, current, total, disabled, text, state }, ref) => {
     const navigate = useNavigate();
+    const percent = total > 0 ? (current / total) * 100 : 0;
+
     return (
       <div
         ref={ref}
@@ -13,7 +15,7 @@ const ProgressButtonBar = React.forwardRef(
           <button
             onClick={() => navigate(navigateTo, { state })}
             disabled={disabled}
-            className="disabled:opacity-30 disabled:shadow-none transition-all active:scale-[0.98] flex-2 bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/30">
+            className="disabled:opacity-30 disabled:shadow-none transition-all active:scale-[0.98] w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/30">
             {text}
             <ArrowRight size={20} />
           </button>
@@ -21,11 +23,12 @@ const ProgressButtonBar = React.forwardRef(
         <div className="mt-4 flex justify-center">
           <div className="h-1.5 w-32 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className={`h-full bg-accent ${progress === 1 ? "w-1/4" : progress === 2 ? "w-1/2" : progress === 3 ? "w-full" : "w-0"} rounded-full`}></div>
+              style={{ width: `${percent}%` }}
+              className={`h-full bg-accent rounded-full transition-all duration-500 ease-in-out`}></div>
           </div>
         </div>
         <p className="text-[10px]  text-center text-accent mt-2 font-medium uppercase tracking-widest">
-          Progress: {progress} of 3 Positions
+          Progress: {current} of {total} Positions
         </p>
       </div>
     );

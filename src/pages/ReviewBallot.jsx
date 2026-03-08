@@ -22,7 +22,10 @@ export default function ReviewBallot() {
   const [error, setError] = useState(null);
 
   const fetchSelectedDetails = async () => {
-    const ids = Object.values(selectedCandidates);
+    // Flatten nested selectedCandidates: { org: { pos: id } } -> [id, id, ...]
+    const ids = Object.values(selectedCandidates).flatMap((orgSelections) =>
+      Object.values(orgSelections),
+    );
     if (ids.length === 0) {
       setIsLoading(false);
       return;
@@ -53,7 +56,9 @@ export default function ReviewBallot() {
     setIsSubmitting(true);
     setError(null);
 
-    const selectedIds = Object.values(selectedCandidates);
+    const selectedIds = Object.values(selectedCandidates).flatMap(
+      (orgSelections) => Object.values(orgSelections),
+    );
 
     try {
       const votePromises = selectedIds.map((id) =>
@@ -82,12 +87,12 @@ export default function ReviewBallot() {
     }
   };
 
-  const getCandidateForPosition = (position) => {
-    const candidateId = selectedCandidates[position];
+  const getCandidateForPosition = (org, position) => {
+    const orgSelections = selectedCandidates[org] || {};
+    const candidateId = orgSelections[position];
     return candidates.find((c) => c.id === candidateId);
   };
 
-  // Define the positions we expect to see
   const POSITIONS = [
     "President",
     "Vice President",
@@ -97,6 +102,8 @@ export default function ReviewBallot() {
     "PRO",
     "Representative",
   ];
+
+  const organizations = Object.keys(selectedCandidates);
 
   return (
     <div className="font-display bg-background-light text-slate-900 min-h-screen flex flex-col">
@@ -141,59 +148,55 @@ export default function ReviewBallot() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12">
-            {POSITIONS.map((position) => {
-              const candidate = getCandidateForPosition(position);
-
-              if (!candidate)
-                return (
-                  <div
-                    key={position}
-                    className="bg-white p-5 rounded-2xl border border-dashed border-slate-200 flex items-center gap-5 grayscale opacity-60">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
-                      <Ban size={32} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-                        {position}
-                      </p>
-                      <p className="text-lg font-bold italic text-slate-400">
-                        Not Selected
-                      </p>
-                    </div>
-                  </div>
-                );
-
-              return (
-                <div
-                  key={position}
-                  className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-all flex items-center gap-5">
-                  <div className="relative">
-                    <img
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover bg-primary/10 ring-2 ring-primary/5"
-                      src={
-                        candidate.image_url || "https://via.placeholder.com/150"
-                      }
-                      alt={candidate.full_name}
-                    />
-                    <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full shadow-lg">
-                      <CheckCircle size={14} />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest mb-1">
-                      {position}
-                    </p>
-                    <p className="text-lg md:text-xl font-bold">
-                      {candidate.full_name}
-                    </p>
-                    <p className="text-xs text-slate-400 font-medium">
-                      {candidate.organization || "No Party"}
-                    </p>
-                  </div>
+          <div className="space-y-12">
+            {organizations.map((org) => (
+              <div key={org} className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-primary rounded-full" />
+                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+                    {org}
+                  </h3>
                 </div>
-              );
-            })}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  {POSITIONS.map((position) => {
+                    const candidate = getCandidateForPosition(org, position);
+                    if (!candidate) return null;
+
+                    return (
+                      <div
+                        key={position}
+                        className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-all flex items-center gap-5">
+                        <div className="relative">
+                          <img
+                            className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover bg-primary/10 ring-2 ring-primary/5"
+                            src={
+                              candidate.image_url ||
+                              "https://via.placeholder.com/150"
+                            }
+                            alt={candidate.full_name}
+                          />
+                          <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full shadow-lg">
+                            <CheckCircle size={14} />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest mb-1">
+                            {position}
+                          </p>
+                          <p className="text-lg md:text-xl font-bold">
+                            {candidate.full_name}
+                          </p>
+                          <p className="text-xs text-slate-400 font-medium">
+                            {candidate.partylist || "Independent"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -249,11 +252,15 @@ export default function ReviewBallot() {
           </p>
           <div className="mt-4 flex justify-center">
             <div className="h-1.5 w-32 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`h-full bg-accent w-full rounded-full`}></div>
+              <div
+                style={{
+                  width: `100%`,
+                }}
+                className={`h-full bg-accent rounded-full transition-all duration-500 ease-in-out`}></div>
             </div>
           </div>
           <p className="text-[10px]  text-center text-accent mt-2 font-medium uppercase tracking-widest">
-            Progress: 3 of 3 Positions
+            All Organizations Complete
           </p>
         </div>
       </footer>

@@ -269,8 +269,8 @@ function StudentLoginInfo() {
 
       <ProgressButtonBar
         navigateTo={studentData ? `/ballot/${studentData.student_number}` : ""}
-        progress={1}
-        disabled={!studentData}
+        current={studentData ? 1 : 0}
+        total={3}
         ref={progressButtonBarRef}
         text={"Start Voting Session"}
       />
