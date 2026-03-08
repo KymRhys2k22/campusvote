@@ -5,7 +5,7 @@ export default function VotingSuccess() {
   const navigate = useNavigate();
 
   return (
-    <div className="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+    <div className="font-display bg-background-light text-slate-900 min-h-screen flex flex-col">
       <div className="h-12 w-full"></div>
 
       <main className="flex-1 flex flex-col px-6 pb-12 items-center justify-center max-w-md mx-auto w-full">
@@ -17,30 +17,30 @@ export default function VotingSuccess() {
         </div>
 
         <div className="text-center space-y-2 mb-10">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Your Vote has Been Cast!
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 px-4">
+          <p className="text-slate-500 px-4">
             Thank you for participating in the 2024 Student Council Elections.
             Your voice shapes our future.
           </p>
         </div>
 
-        <div className="w-full bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6 mb-8 shadow-sm">
+        <div className="w-full bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm">
           <div className="space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">
                 Submission Time
               </span>
-              <span className="text-sm font-semibold text-slate-900 dark:text-white">
+              <span className="text-sm font-semibold text-slate-900">
                 Oct 24, 14:32 PM
               </span>
             </div>
             <div className="flex flex-col space-y-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">
                 Digital Receipt
               </span>
-              <div className="flex items-center justify-between bg-background-light dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+              <div className="flex items-center justify-between bg-background-light p-3 rounded-lg border border-slate-100">
                 <code className="text-primary font-bold tracking-widest uppercase">
                   SC-29384-X9L
                 </code>
@@ -56,7 +56,7 @@ export default function VotingSuccess() {
         </div>
 
         <div className="w-full text-center space-y-4 mb-8">
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+          <p className="text-sm font-semibold text-slate-600">
             Spread the word!
           </p>
           <div className="flex justify-center gap-4">
@@ -70,7 +70,7 @@ export default function VotingSuccess() {
         </div>
       </main>
 
-      <footer className="p-6 pb-10 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 ios-blur bg-opacity-80">
+      <footer className="p-6 pb-10 bg-white border-t border-slate-100 ios-blur bg-opacity-80">
         <div className="max-w-md mx-auto space-y-4">
           <button
             onClick={() => navigate("/")}
@@ -79,13 +79,13 @@ export default function VotingSuccess() {
           </button>
           <button
             onClick={() => navigate("/results")}
-            className="w-full bg-transparent text-slate-500 dark:text-slate-400 font-medium py-2 rounded-xl flex items-center justify-center transition-all active:opacity-60">
+            className="w-full bg-transparent text-slate-500 font-medium py-2 rounded-xl flex items-center justify-center transition-all active:opacity-60">
             View Election Results
             <ExternalLink size={14} className="ml-1" />
           </button>
         </div>
         <div className="mt-8 flex justify-center">
-          <div className="w-32 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          <div className="w-32 h-1.5 bg-slate-300 rounded-full"></div>
         </div>
       </footer>
     </div>

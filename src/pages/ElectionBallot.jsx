@@ -95,7 +95,7 @@ export default function ElectionBallot() {
   }, [progressPercent]);
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+    <div className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col">
       <header className=" backdrop-blur-md  sticky top-0 z-40 border-b border-primary/10">
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-2">
@@ -103,11 +103,11 @@ export default function ElectionBallot() {
               Election Ballot
             </h1>
           </div>
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
+          <div className="flex items-center gap-2 text-slate-500 text-sm">
             <GraduationCap size={16} />
             <span>University Student Council 2026</span>
           </div>
-          <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
               style={{ width: `${progressPercent}%` }}
               className="h-full bg-primary rounded-full transition-all duration-500 ease-in-out"></div>
@@ -119,7 +119,7 @@ export default function ElectionBallot() {
         <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8">
           <div className="flex gap-3">
             <Info size={20} className="text-primary shrink-0" />
-            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+            <p className="text-sm leading-relaxed text-slate-700">
               Please select{" "}
               <span className="font-bold text-primary">one (1)</span> candidate
               for all the positions. Tap a card to select.
@@ -142,10 +142,10 @@ export default function ElectionBallot() {
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-1.5 bg-primary rounded-full" />
-                      <h3 className="text-xl font-black tracking-tight text-slate-800 dark:text-white uppercase">
+                      <h3 className="text-xl font-black tracking-tight text-slate-800 uppercase">
                         {position}
                       </h3>
-                      <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg border border-slate-200">
                         {candidatesInPosition.length}{" "}
                         {candidatesInPosition.length === 1
                           ? "Candidate"
@@ -155,12 +155,12 @@ export default function ElectionBallot() {
                     <div className="hidden md:flex items-center gap-2">
                       <button
                         onClick={() => handleScroll(position, "left")}
-                        className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
+                        className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
                         <ChevronLeft size={20} />
                       </button>
                       <button
                         onClick={() => handleScroll(position, "right")}
-                        className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
+                        className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
                         <ChevronRight size={20} />
                       </button>
                     </div>

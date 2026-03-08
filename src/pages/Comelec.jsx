@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Activity } from "react";
 import { useGSAP } from "@gsap/react";
 import {
   GraduationCap,
@@ -414,7 +414,7 @@ export default function Comelec() {
     return (
       <div
         ref={loginContainerRef}
-        className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-y-auto">
+        className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-y-auto">
         <div className="w-full max-w-md">
           <div className="text-center mb-10 login-header">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-6 shadow-sm border border-primary/5">
@@ -423,12 +423,12 @@ export default function Comelec() {
             <h1 className="text-3xl font-bold tracking-tight mb-2">
               COMELEC Portal
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-slate-500 font-medium">
               Authorized access only for election management.
             </p>
           </div>
 
-          <div className="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-primary/10 shadow-xl shadow-slate-200/50 dark:shadow-none backdrop-blur-sm login-card">
+          <div className="bg-white p-8 rounded-3xl border border-primary/10 shadow-xl shadow-slate-200/50 backdrop-blur-sm login-card">
             <form onSubmit={handleLogin} className="space-y-6 login-form">
               <div className="login-animate">
                 <label className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block px-1">
@@ -445,7 +445,7 @@ export default function Comelec() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter your username"
-                    className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-4 pl-12 pr-4 shadow-inner ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none"
+                    className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                   />
                 </div>
               </div>
@@ -465,7 +465,7 @@ export default function Comelec() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl py-4 pl-12 pr-12 shadow-inner ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none"
+                    className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-12 shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                   />
                   <button
                     type="button"
@@ -508,10 +508,10 @@ export default function Comelec() {
   }
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col relative overflow-x-hidden">
+    <div className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col relative overflow-x-hidden">
       <header
         ref={headerRef}
-        className="bg-white/80 dark:bg-background-dark/80 sticky top-0 z-40 ios-blur border-b border-primary/10 px-6 py-4 flex items-center justify-between dashboard-header">
+        className="bg-white/80 sticky top-0 z-40 ios-blur border-b border-primary/10 px-6 py-4 flex items-center justify-between dashboard-header">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 text-primary rounded-xl">
             <GraduationCap size={24} />
@@ -537,7 +537,7 @@ export default function Comelec() {
         <div
           ref={statsContainerRef}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
+          <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
               <LayoutDashboard size={24} />
             </div>
@@ -548,7 +548,7 @@ export default function Comelec() {
               <h3 className="text-2xl font-bold">1,248</h3>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
+          <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
             <div className="w-12 h-12 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center">
               <BarChart3 size={24} />
             </div>
@@ -561,7 +561,7 @@ export default function Comelec() {
               </h3>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
+          <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
               <User2 size={24} />
             </div>
@@ -604,10 +604,10 @@ export default function Comelec() {
                     <div className="flex items-center justify-between px-2">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-1.5 bg-primary rounded-full" />
-                        <h3 className="text-xl font-black tracking-tight text-slate-800 dark:text-white uppercase">
+                        <h3 className="text-xl font-black tracking-tight text-slate-800 uppercase">
                           {position}
                         </h3>
-                        <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg border border-slate-200">
                           {candidatesInPosition.length}{" "}
                           {candidatesInPosition.length === 1
                             ? "Candidate"
@@ -641,12 +641,12 @@ export default function Comelec() {
               })}
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-800/50 rounded-3xl border border-primary/10 p-12 text-center">
-              <div className="w-20 h-20 bg-slate-100 dark:bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
+            <div className="bg-white rounded-3xl border border-primary/10 p-12 text-center">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
                 <BarChart3 size={40} />
               </div>
               <h3 className="text-xl font-bold mb-2">No candidates found</h3>
-              <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+              <p className="text-slate-500 max-w-sm mx-auto">
                 Use the <Plus size={16} className="inline-block" /> button below
                 to add your first candidate to the election.
               </p>
@@ -666,7 +666,7 @@ export default function Comelec() {
       </button>
 
       {/* Add Candidate Modal */}
-      {showAddModal && (
+      <Activity mode={showAddModal ? "visible" : "hidden"}>
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6">
           <div
             className="absolute inset-0  backdrop-blur-sm modal-backdrop"
@@ -674,8 +674,8 @@ export default function Comelec() {
           />
           <div
             ref={modalContainerRef}
-            className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-primary/10 overflow-hidden modal-content flex flex-col max-h-[90vh]">
-            <div className="px-6 py-5 border-b border-primary/10 flex items-center justify-between bg-white dark:bg-slate-800">
+            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-primary/10 overflow-hidden modal-content flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-primary/10 flex items-center justify-between bg-white">
               <h2 className="text-xl font-bold tracking-tight">
                 Add New Candidate
               </h2>
@@ -692,7 +692,7 @@ export default function Comelec() {
               <div className="space-y-4">
                 {/* Image Preview Area */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-28 h-28 rounded-3xl bg-slate-100 dark:bg-slate-700/50 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all">
+                  <div className="w-28 h-28 rounded-3xl bg-slate-100 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all">
                     {newCandidate.image_url ? (
                       <img
                         src={newCandidate.image_url}
@@ -726,7 +726,7 @@ export default function Comelec() {
                         }))
                       }
                       placeholder="e.g. Maya Chen"
-                      className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none"
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                     />
                   </div>
                 </div>
@@ -749,7 +749,7 @@ export default function Comelec() {
                           position: e.target.value,
                         }))
                       }
-                      className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
                       <option>President</option>
                       <option>Vice President</option>
                       <option>Secretary</option>
@@ -780,7 +780,7 @@ export default function Comelec() {
                         }))
                       }
                       placeholder="e.g. Independent"
-                      className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none"
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                     />
                   </div>
                 </div>
@@ -803,7 +803,7 @@ export default function Comelec() {
                           partylist: e.target.value,
                         }))
                       }
-                      className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
                       <option disabled selected value="">
                         Select Partylist
                       </option>
@@ -838,7 +838,7 @@ export default function Comelec() {
                         }))
                       }
                       placeholder="Outline core platforms and goals..."
-                      className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
                     />
                   </div>
                 </div>
@@ -864,7 +864,7 @@ export default function Comelec() {
                         }))
                       }
                       placeholder="Enter candidate's quote or platform summary..."
-                      className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
                     />
                   </div>
                 </div>
@@ -883,7 +883,7 @@ export default function Comelec() {
                     type="button"
                     onClick={() => fileInputRef.current.click()}
                     disabled={uploading}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 hover:text-primary hover:border-primary/50 transition-all font-bold text-sm uppercase tracking-wider">
+                    className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:text-primary hover:border-primary/50 transition-all font-bold text-sm uppercase tracking-wider">
                     {uploading ? (
                       <RefreshCw size={18} className="animate-spin" />
                     ) : (
@@ -907,7 +907,7 @@ export default function Comelec() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-bold py-4 rounded-2xl transition-all active:scale-[0.98]">
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all active:scale-[0.98]">
                   Cancel
                 </button>
                 <button
@@ -924,7 +924,7 @@ export default function Comelec() {
             </form>
           </div>
         </div>
-      )}
+      </Activity>
     </div>
   );
 }

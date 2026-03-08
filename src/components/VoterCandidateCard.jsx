@@ -98,7 +98,7 @@ export default function CandidateCard({ candidate, selected }) {
               className="absolute inset-0"
               onClick={() => setShowDetailModal(false)}
             />
-            <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
+            <div className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
               {/* Header / Hero */}
               <div className="relative h-64 shrink-0">
                 {hasImage ? (
@@ -142,7 +142,7 @@ export default function CandidateCard({ candidate, selected }) {
                         </h4>
                       </div>
                       <div className="space-y-2">
-                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                           <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">
                             Organization
                           </p>
@@ -150,7 +150,7 @@ export default function CandidateCard({ candidate, selected }) {
                             {candidate.organization || "Independent"}
                           </p>
                         </div>
-                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                           <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">
                             Partylist
                           </p>
@@ -175,7 +175,7 @@ export default function CandidateCard({ candidate, selected }) {
                           size={40}
                           className="absolute -top-4 -left-4 text-primary/10 rotate-180"
                         />
-                        <p className="text-lg font-bold text-slate-700 dark:text-slate-200 italic leading-relaxed pt-2">
+                        <p className="text-lg font-bold text-slate-700 italic leading-relaxed pt-2">
                           "
                           {candidate.quotes ||
                             "Always ready to serve for the betterment of the student body."}
@@ -192,8 +192,8 @@ export default function CandidateCard({ candidate, selected }) {
                             Platforms
                           </h4>
                         </div>
-                        <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
-                          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                        <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                          <p className="text-sm text-slate-600 leading-relaxed font-medium">
                             {candidate.platform}
                           </p>
                         </div>
@@ -204,7 +204,7 @@ export default function CandidateCard({ candidate, selected }) {
               </div>
 
               {/* Footer Action */}
-              <div className="p-8 border-t border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="p-8 border-t border-slate-100 shrink-0">
                 <button
                   onClick={() => setShowDetailModal(false)}
                   className="w-full bg-primary hover:bg-primary/90 text-white font-black py-4 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-widest text-sm active:scale-[0.98]">

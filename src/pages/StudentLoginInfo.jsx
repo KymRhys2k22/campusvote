@@ -140,11 +140,11 @@ function StudentLoginInfo() {
   return (
     <div
       ref={containerRef}
-      className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+      className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col">
       {/* Header */}
       <header
         ref={headerRef}
-        className=" rounded-b-4xl md:rounded-b-full backdrop-blur-sm bg-white/80 dark:bg-background-dark/80 sticky top-0 z-40 ios-blur border-b border-primary/10">
+        className=" rounded-b-4xl md:rounded-b-full backdrop-blur-sm bg-white/80 sticky top-0 z-40 ios-blur border-b border-primary/10">
         <div className="px-5 py-6 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
             <User size={32} />
@@ -152,7 +152,7 @@ function StudentLoginInfo() {
           <h1 className="text-2xl font-bold tracking-tight mb-1">
             Student Login
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500">
             Verify your identity to proceed with the election.
           </p>
         </div>
@@ -177,7 +177,7 @@ function StudentLoginInfo() {
                   placeholder="e.g. 20000000015"
                   value={studentNumber}
                   onChange={(e) => setStudentNumber(e.target.value)}
-                  className="placeholder:text-slate-400 w-full bg-white dark:bg-slate-800/50 border-none rounded-xl py-3.5 pl-12 pr-4 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none"
+                  className="placeholder:text-slate-400 w-full bg-white border-none rounded-xl py-3.5 pl-12 pr-4 shadow-sm ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                 />
               </div>
             </div>
@@ -198,7 +198,7 @@ function StudentLoginInfo() {
                   placeholder="e.g. student@feualabang.edu.ph"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="placeholder:text-slate-400 w-full bg-white dark:bg-slate-800/50 border-none rounded-xl py-3.5 pl-12 pr-4 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all outline-none"
+                  className="placeholder:text-slate-400 w-full bg-white border-none rounded-xl py-3.5 pl-12 pr-4 shadow-sm ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                 />
               </div>
             </div>
@@ -245,7 +245,7 @@ function StudentLoginInfo() {
                   type="text"
                   readOnly
                   value={studentData.name}
-                  className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-3.5 px-4 text-slate-600 dark:text-slate-400 font-medium outline-none cursor-not-allowed"
+                  className="w-full bg-slate-100 border-none rounded-xl py-3.5 px-4 text-slate-600 font-medium outline-none cursor-not-allowed"
                 />
               </div>
 
@@ -257,7 +257,7 @@ function StudentLoginInfo() {
                   type="text"
                   readOnly
                   value={studentData.section}
-                  className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-3.5 px-4 text-slate-600 dark:text-slate-400 font-medium outline-none cursor-not-allowed"
+                  className="w-full bg-slate-100 border-none rounded-xl py-3.5 px-4 text-slate-600 font-medium outline-none cursor-not-allowed"
                 />
               </div>
             </div>

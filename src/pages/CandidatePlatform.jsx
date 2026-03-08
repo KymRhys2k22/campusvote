@@ -29,13 +29,13 @@ export default function CandidatePlatform() {
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col justify-end">
       <div
         ref={modalRef}
-        className="bg-white dark:bg-slate-900 rounded-t-[2.5rem] w-full max-h-[90%] overflow-y-auto">
-        <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-4 mb-6"></div>
+        className="bg-white rounded-t-[2.5rem] w-full max-h-[90%] overflow-y-auto">
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-4 mb-6"></div>
 
         <div className="px-8 pb-10 relative">
           <button
             onClick={handleClose}
-            className="absolute top-0 right-8 w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+            className="absolute top-0 right-8 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
             <X size={18} className="text-slate-500" />
           </button>
 
@@ -50,7 +50,7 @@ export default function CandidatePlatform() {
                 <BadgeCheck size={14} />
               </div>
             </div>
-            <h2 className="text-2xl font-bold mt-4 text-slate-800 dark:text-white">
+            <h2 className="text-2xl font-bold mt-4 text-slate-800">
               Maya Chen
             </h2>
             <span className="text-primary font-semibold text-sm">
@@ -69,38 +69,38 @@ export default function CandidatePlatform() {
                     <Utensils size={20} className="text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-800 dark:text-slate-100">
+                    <h4 className="font-bold text-slate-800">
                       Better Cafeteria Food
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Partnering with local organic farms to provide healthier,
                       varied options daily.
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <div className="shrink-0 w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center">
                     <BookOpen size={20} className="text-orange-500" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-800 dark:text-slate-100">
+                    <h4 className="font-bold text-slate-800">
                       Extended Library Hours
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       24/7 access to study zones during finals and midterms with
                       safe-escort services.
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <div className="shrink-0 w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center">
                     <Leaf size={20} className="text-green-500" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-800 dark:text-slate-100">
+                    <h4 className="font-bold text-slate-800">
                       Green Campus Initiative
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Eliminating single-use plastics and adding 50+ new solar
                       charging stations.
                     </p>
@@ -113,7 +113,7 @@ export default function CandidatePlatform() {
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">
                 About Maya
               </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-600 leading-relaxed">
                 "As your current Vice President, I've spent the last year
                 listening to your concerns. My goal is to build a campus that
                 prioritizes student wellness and sustainable growth."

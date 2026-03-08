@@ -34,10 +34,10 @@ export default function NotFound() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-background-light dark:bg-background-dark flex flex-col items-center justify-center p-6 text-center font-display overflow-hidden">
+      className="min-h-screen bg-background-light flex flex-col items-center justify-center p-6 text-center font-display overflow-hidden">
       <div
         ref={contentRef}
-        className="max-w-md w-full py-12 px-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-slate-800 rounded-[3rem] shadow-2xl relative z-10">
+        className="max-w-md w-full py-12 px-8 bg-white/40 backdrop-blur-xl border border-white/20 rounded-[3rem] shadow-2xl relative z-10">
         <div className="float-icon mb-8 inline-flex p-6 bg-accent/10 rounded-full border border-accent/20">
           <AlertTriangle size={64} className="text-accent" />
         </div>
@@ -45,10 +45,10 @@ export default function NotFound() {
         <h1 className="text-7xl font-black text-primary mb-4 tracking-tighter">
           404
         </h1>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">
           Page Not Found
         </h2>
-        <p className="text-slate-500 dark:text-slate-400 mb-10 leading-relaxed text-balance">
+        <p className="text-slate-500 mb-10 leading-relaxed text-balance">
           It seems you've wandered off the grid. The page you are looking for
           doesn't exist or has been moved.
         </p>
@@ -66,7 +66,7 @@ export default function NotFound() {
 
           <button
             onClick={() => navigate(-1)}
-            className="w-full bg-transparent border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]">
+            className="w-full bg-transparent border-2 border-slate-200 hover:border-slate-300 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]">
             <ArrowLeft size={18} />
             Go Previous
           </button>

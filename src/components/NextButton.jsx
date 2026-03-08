@@ -7,7 +7,7 @@ const NextButton = React.forwardRef(({ text, navigation, disabled }, ref) => {
   return (
     <div
       ref={ref}
-      className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-background-dark/90 ios-blur border-t border-slate-200 dark:border-slate-800 p-4 pb-8 z-50">
+      className="fixed bottom-0 left-0 right-0 bg-white/90 ios-blur border-t border-slate-200 p-4 pb-8 z-50">
       <div className=" mx-auto">
         <button
           onClick={() => navigate(navigation)}

@@ -99,8 +99,8 @@ export default function ReviewBallot() {
   ];
 
   return (
-    <div className="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 py-3 flex items-center justify-between">
+    <div className="font-display bg-background-light text-slate-900 min-h-screen flex flex-col">
+      <header className="sticky top-0 z-50 bg-background-light/80 backdrop-blur-md border-b border-primary/10 px-4 py-3 flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-primary font-medium disabled:opacity-50"
@@ -120,7 +120,7 @@ export default function ReviewBallot() {
           <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
             Final Review
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm md:text-base leading-relaxed max-w-lg mx-auto">
+          <p className="text-slate-500 mt-3 text-sm md:text-base leading-relaxed max-w-lg mx-auto">
             Please double-check your selections before submitting. You cannot
             change your vote after submission.
           </p>
@@ -149,8 +149,8 @@ export default function ReviewBallot() {
                 return (
                   <div
                     key={position}
-                    className="bg-white dark:bg-slate-800/30 p-5 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 flex items-center gap-5 grayscale opacity-60">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-slate-400">
+                    className="bg-white p-5 rounded-2xl border border-dashed border-slate-200 flex items-center gap-5 grayscale opacity-60">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
                       <Ban size={32} />
                     </div>
                     <div className="flex-1">
@@ -167,7 +167,7 @@ export default function ReviewBallot() {
               return (
                 <div
                   key={position}
-                  className="bg-white dark:bg-slate-800/50 p-5 rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-all flex items-center gap-5">
+                  className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-all flex items-center gap-5">
                   <div className="relative">
                     <img
                       className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover bg-primary/10 ring-2 ring-primary/5"
@@ -201,7 +201,7 @@ export default function ReviewBallot() {
           <label className="relative flex items-start group cursor-pointer p-6 rounded-3xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
             <div className="flex items-center h-6 mt-1">
               <input
-                className="h-6 w-6 rounded-lg border-slate-300 dark:border-slate-600 text-primary focus:ring-primary transition-all cursor-pointer"
+                className="h-6 w-6 rounded-lg border-slate-300 text-primary focus:ring-primary transition-all cursor-pointer"
                 id="final-confirm"
                 name="final-confirm"
                 type="checkbox"
@@ -211,10 +211,10 @@ export default function ReviewBallot() {
               />
             </div>
             <div className="ml-4 text-sm md:text-base leading-relaxed">
-              <span className="font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">
+              <span className="font-black text-slate-800 uppercase tracking-tight">
                 I understand that my vote is final.
               </span>
-              <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-3 font-medium leading-relaxed">
+              <p className="text-slate-500 text-xs md:text-sm mt-3 font-medium leading-relaxed">
                 By checking this box, you confirm that your selections are
                 accurate and you are ready to transmit your digital ballot. You
                 won't be able to edit this later.
@@ -224,7 +224,7 @@ export default function ReviewBallot() {
         </div>
       </main>
 
-      <footer className="mt-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-primary/10 px-4 py-8 md:py-10">
+      <footer className="mt-auto bg-white/80 backdrop-blur-md border-t border-primary/10 px-4 py-8 md:py-10">
         <div className="max-w-md mx-auto">
           <button
             onClick={submitBallot}
@@ -246,6 +246,14 @@ export default function ReviewBallot() {
           </button>
           <p className="text-center text-[10px] md:text-xs uppercase tracking-[0.2em] text-slate-400 mt-6 font-black opacity-70">
             Secured by Campus Comelec
+          </p>
+          <div className="mt-4 flex justify-center">
+            <div className="h-1.5 w-32 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full bg-accent w-full rounded-full`}></div>
+            </div>
+          </div>
+          <p className="text-[10px]  text-center text-accent mt-2 font-medium uppercase tracking-widest">
+            Progress: 3 of 3 Positions
           </p>
         </div>
       </footer>

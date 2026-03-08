@@ -86,11 +86,11 @@ export default function ElectionResults() {
   const leader = filteredCandidates[0];
 
   return (
-    <div className="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
-      <div className="h-12 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between px-6 border-b border-primary/10">
+    <div className="font-display bg-background-light text-slate-900 min-h-screen">
+      <div className="h-12 w-full bg-white/80 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between px-6 border-b border-primary/10">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Live Results
           </span>
         </div>
@@ -104,7 +104,7 @@ export default function ElectionResults() {
           <h1 className="text-2xl font-bold tracking-tight">
             Election Dashboard
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500">
             2024 General Student Elections
           </p>
         </header>
@@ -140,15 +140,15 @@ export default function ElectionResults() {
         </section>
 
         <nav className="px-4 mb-6">
-          <div className="bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-700">
+          <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
             <button
               onClick={() => setActiveTab("Student Council")}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === "Student Council" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400"}`}>
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === "Student Council" ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}>
               Student Council
             </button>
             <button
               onClick={() => setActiveTab("Other")}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === "Other" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400"}`}>
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === "Other" ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}>
               Recreation
             </button>
           </div>
@@ -174,7 +174,7 @@ export default function ElectionResults() {
 
             {/* Leader Card */}
             {leader && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border-2 border-primary/30 shadow-sm relative overflow-hidden transition-all duration-500">
+              <div className="bg-white rounded-2xl p-5 border-2 border-primary/30 shadow-sm relative overflow-hidden transition-all duration-500">
                 <div className="absolute top-0 right-0">
                   <div className="bg-primary text-white text-[10px] font-black px-6 py-1.5 rotate-45 translate-x-5 -translate-y-1 uppercase tracking-tighter">
                     Leader
@@ -218,7 +218,7 @@ export default function ElectionResults() {
                     <span>Vote Progression</span>
                     <span>{leader.vote_count} Total</span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                       style={{
@@ -234,7 +234,7 @@ export default function ElectionResults() {
               {filteredCandidates.slice(1).map((candidate, index) => (
                 <div
                   key={candidate.id}
-                  className="bg-white dark:bg-slate-900/50 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/20 transition-all group">
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:border-primary/20 transition-all group">
                   <div className="flex items-center gap-4 mb-3">
                     <div className="relative">
                       <img
@@ -245,7 +245,7 @@ export default function ElectionResults() {
                         }
                         alt={candidate.full_name}
                       />
-                      <div className="absolute -top-1.5 -left-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black border border-white dark:border-slate-700 shadow-sm">
+                      <div className="absolute -top-1.5 -left-1.5 bg-slate-100 text-slate-500 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black border border-white shadow-sm">
                         {index + 2}
                       </div>
                     </div>
@@ -258,7 +258,7 @@ export default function ElectionResults() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-tight">
+                      <p className="text-lg font-bold text-slate-700 leading-tight">
                         {(candidate.vote_count || 0).toLocaleString()}
                       </p>
                       <p className="text-[10px] text-slate-400 font-bold uppercase">
@@ -271,7 +271,7 @@ export default function ElectionResults() {
                       </p>
                     </div>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary/30 rounded-full transition-all duration-1000 ease-out"
                       style={{
@@ -284,11 +284,11 @@ export default function ElectionResults() {
           </section>
         ) : (
           <div className="px-6 py-20 text-center">
-            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
+            <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
               <TrendingUp size={40} />
             </div>
             <h3 className="text-lg font-bold mb-2">No Candidates Yet</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+            <p className="text-sm text-slate-500 max-w-xs mx-auto">
               As soon as candidates are added and votes start coming in, you'll
               see live tallies here.
             </p>
@@ -296,13 +296,13 @@ export default function ElectionResults() {
         )}
 
         <section className="mt-8 px-4">
-          <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-5 flex items-center gap-4 border border-primary/10">
+          <div className="bg-primary/5 rounded-2xl p-5 flex items-center gap-4 border border-primary/10">
             <div className="bg-primary/20 p-2.5 rounded-xl text-primary">
               <TrendingUp size={24} />
             </div>
             <div>
               <h4 className="text-sm font-bold">Voter Engagement</h4>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              <p className="text-[11px] text-slate-500 leading-relaxed">
                 Live rankings are updated every time a new ballot is cast. Stay
                 tuned for real-time changes!
               </p>
@@ -311,7 +311,7 @@ export default function ElectionResults() {
         </section>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-8 pt-2 px-6 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 pb-8 pt-2 px-6 z-50">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <button
             onClick={() => navigate("/")}

@@ -6,7 +6,6 @@
   --color-primary: #009900; /* FEU Green */
   --color-accent: #ffc20e; /* FEU Gold */
   --color-background-light: #f6f7f8;
-  --color-background-dark: #101922;
 
   /* FEU Branding Colors */
   --color-feu-green: #009900;
@@ -17,12 +16,12 @@
 
 @layer base {
   body {
-    @apply font-display antialiased;
+    @apply font-display antialiased bg-background-light text-slate-900;
   }
 }
 
 .ios-blur {
-  @apply backdrop-blur-md bg-white/80 dark:bg-slate-900/80;
+  @apply backdrop-blur-md bg-white/80;
 }
 
 .no-scrollbar::-webkit-scrollbar {
