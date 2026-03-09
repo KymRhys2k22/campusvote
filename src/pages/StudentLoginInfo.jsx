@@ -273,6 +273,7 @@ function StudentLoginInfo() {
         total={3}
         ref={progressButtonBarRef}
         text={"Start Voting Session"}
+        disabled={!studentData}
       />
     </div>
   );

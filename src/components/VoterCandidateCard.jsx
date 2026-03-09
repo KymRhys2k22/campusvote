@@ -20,10 +20,10 @@ export default function CandidateCard({ candidate, selected }) {
   return (
     <>
       <div
-        className={`relative h-[480px] w-[280px] sm:w-[320px] rounded-[2.5rem] overflow-hidden group shadow-2xl transition-all duration-300 candidate-card shrink-0 cursor-pointer ${
+        className={`relative h-[480px] w-[280px] sm:w-[320px]  overflow-hidden group shadow-md transition-all duration-300 candidate-card shrink-0 cursor-pointer ${
           selected
-            ? "border-8 border-accent shadow-accent/20 scale-[0.98]"
-            : "shadow-slate-900/10 "
+            ? "border-8 border-accent shadow-accent/20 scale-[0.98] rotate-z-2  "
+            : "shadow-slate-900 border-8  rounded-[2.5rem] border-white/50"
         }`}>
         {/* Background Image/Fallback */}
         <div className="absolute inset-0">
@@ -31,7 +31,7 @@ export default function CandidateCard({ candidate, selected }) {
             <img
               src={candidate.image_url}
               alt={candidate.full_name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-top w-full h-full object-contain  transition-transform duration-700 group-hover:scale-110"
             />
           ) : (
             <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">

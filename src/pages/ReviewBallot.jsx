@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useAuth } from "../context/AuthContext";
 import {
   ChevronLeft,
   Ban,
@@ -20,6 +21,9 @@ export default function ReviewBallot() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [error, setError] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const { logout } = useAuth();
 
   const fetchSelectedDetails = async () => {
     // Flatten nested selectedCandidates: { org: { pos: id } } -> [id, id, ...]
@@ -51,6 +55,23 @@ export default function ReviewBallot() {
     fetchSelectedDetails();
   }, [selectedCandidates]);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+    let timer;
+    if (showSuccessModal && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (showSuccessModal && countdown === 0) {
+      logout();
+      navigate("/", { replace: true });
+    }
+    return () => clearTimeout(timer);
+  }, [showSuccessModal, countdown, navigate, logout]);
+
   const submitBallot = async () => {
     if (!isConfirmed) return;
     setIsSubmitting(true);
@@ -79,7 +100,7 @@ export default function ReviewBallot() {
         throw new Error(`Voting Error: ${errorMsg} ${errorDetail}`);
       }
 
-      navigate("/success");
+      setShowSuccessModal(true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -200,7 +221,7 @@ export default function ReviewBallot() {
           </div>
         )}
 
-        <div className="mb-12 max-w-2xl mx-auto">
+        <div className="mb-12 mt-6 max-w-2xl mx-auto">
           <label className="relative flex items-start group cursor-pointer p-6 rounded-3xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
             <div className="flex items-center h-6 mt-1">
               <input
@@ -247,9 +268,6 @@ export default function ReviewBallot() {
               </>
             )}
           </button>
-          <p className="text-center text-[10px] md:text-xs uppercase tracking-[0.2em] text-slate-400 mt-6 font-black opacity-70">
-            Secured by Campus Comelec
-          </p>
           <div className="mt-4 flex justify-center">
             <div className="h-1.5 w-32 bg-slate-200 rounded-full overflow-hidden">
               <div
@@ -264,6 +282,55 @@ export default function ReviewBallot() {
           </p>
         </div>
       </footer>
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="bg-primary p-6 text-white text-center relative shrink-0">
+              <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+                <div
+                  className="h-full bg-accent transition-all duration-1000 ease-linear"
+                  style={{ width: `${(countdown / 10) * 100}%` }}
+                />
+              </div>
+              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-accent">
+                <CheckCircle size={32} className="text-accent" />
+              </div>
+              <h2 className="text-2xl font-black mb-1">Votes Transmitted!</h2>
+              <p className="text-primary-100 text-sm">
+                Redirecting to home in {countdown}...
+              </p>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                Your Official Selections
+              </p>
+              <div className="space-y-3">
+                {candidates.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <img
+                      src={c.image_url || "https://via.placeholder.com/150"}
+                      alt={c.full_name}
+                      className="w-12 h-12 rounded-lg object-cover ring-1 ring-slate-100"
+                    />
+                    <div>
+                      <p className="text-[10px] font-bold text-primary uppercase">
+                        {c.position}
+                      </p>
+                      <p className="text-sm font-bold text-slate-800">
+                        {c.full_name}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

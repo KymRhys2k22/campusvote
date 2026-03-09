@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Activity } from "react";
 import {
   GraduationCap,
   Info,
@@ -6,6 +6,7 @@ import {
   ChevronRight,
   RefreshCw,
   CheckCircle,
+  ActivityIcon,
 } from "lucide-react";
 
 import { supabase } from "../lib/supabase";
@@ -35,6 +36,13 @@ export default function ElectionBallot() {
     "PRO",
     "Representative",
   ];
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const fetchCandidates = async () => {
     setIsLoading(true);
@@ -195,20 +203,12 @@ export default function ElectionBallot() {
               Overall Progress: {globalStats.totalSelected} /{" "}
               {globalStats.totalPositions} Votes
             </span>
-            {viewMode === "voting" && (
-              <button
-                onClick={() => setViewMode("hub")}
-                className="text-primary text-xs font-bold flex items-center gap-1 hover:underline">
-                <ChevronLeft size={14} />
-                Back to Organizations
-              </button>
-            )}
           </div>
         </div>
       </header>
 
       <main className="grow px-4 py-6">
-        {viewMode === "voting" && (
+        <Activity mode={viewMode === "voting" ? "visible" : "hidden"}>
           <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8">
             <div className="flex gap-3">
               <Info size={20} className="text-primary shrink-0" />
@@ -227,7 +227,7 @@ export default function ElectionBallot() {
               </div>
             </div>
           </div>
-        )}
+        </Activity>
 
         {isLoading ? (
           <div className="flex items-center justify-center pt-24">
@@ -375,6 +375,20 @@ export default function ElectionBallot() {
                         </div>
                       );
                     })}
+                    <Activity
+                      mode={viewMode === "voting" ? "visible" : "hidden"}>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => {
+                            setViewMode("hub");
+                            scrollToTop();
+                          }}
+                          className="hover:bg-primary/20 hover:text-primary/80 transition-all duration-300 hover:scale-105 hover:shadow-lg text-primary rounded-lg px-4 py-2 bg-primary/10 text-md font-bold flex items-center gap-1">
+                          <ChevronLeft size={14} />
+                          Back to Organizations
+                        </button>
+                      </div>
+                    </Activity>
                   </div>
                 );
               })}
