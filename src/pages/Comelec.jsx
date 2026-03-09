@@ -25,10 +25,16 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
+  AlignJustify,
+  Grid,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import gsap from "gsap";
+import { Flip } from "gsap/all";
 import CandidateCard from "../components/CandidateCard";
+import VerticalCandidateCardList from "../components/VerticalCandidateCardList";
+
+gsap.registerPlugin(Flip);
 
 export default function Comelec() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -61,6 +67,7 @@ export default function Comelec() {
     platform: "",
   });
   const [partylists, setPartylists] = useState([]);
+  const [viewMode, setViewMode] = useState("horizontal"); // "horizontal" | "vertical"
 
   // Refs for Animations
   const loginContainerRef = useRef(null);
@@ -71,6 +78,7 @@ export default function Comelec() {
   const modalContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const scrollContainerRefs = useRef({});
+  const flipStateRef = useRef(null);
 
   const POSITIONS = [
     "President",
@@ -82,15 +90,12 @@ export default function Comelec() {
     "Representative",
   ];
 
-  const groupedCandidates = POSITIONS.reduce((acc, pos) => {
-    acc[pos] = candidates
-      .filter((c) => c.position === pos)
-      .sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
-    return acc;
-  }, {});
+  const organizations = [
+    ...new Set(candidates.map((c) => c.organization || "Independent")),
+  ];
 
-  const handleScroll = (position, direction) => {
-    const container = scrollContainerRefs.current[position];
+  const handleScroll = (org, position, direction) => {
+    const container = scrollContainerRefs.current[`${org}-${position}`];
     if (container) {
       const scrollAmount = direction === "left" ? -400 : 400;
       container.scrollBy({ left: scrollAmount, behavior: "smooth" });
@@ -209,23 +214,43 @@ export default function Comelec() {
   useGSAP(
     () => {
       if (isLoggedIn && candidates.length > 0) {
-        gsap.from(".candidate-card:not([data-animated='true'])", {
-          opacity: 0,
-          y: 20,
-          scale: 0.98,
-          duration: 1,
-          stagger: 0.2,
-          ease: "elastic.out(1, 0.3)",
-          overwrite: true,
-          onStart: function () {
-            this.targets().forEach((el) =>
-              el.setAttribute("data-animated", "true"),
-            );
+        gsap.fromTo(
+          ".candidate-card:not([data-animated='true'])",
+          {
+            opacity: 0,
+            y: 20,
+            scale: 0.98,
           },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.6,
+            stagger: { amount: 0.5 },
+            ease: "back.out(1.2)",
+            overwrite: true,
+            onStart: function () {
+              this.targets().forEach((el) =>
+                el.setAttribute("data-animated", "true"),
+              );
+            },
+          },
+        );
+      }
+
+      if (flipStateRef.current) {
+        Flip.from(flipStateRef.current, {
+          duration: 0.8,
+          ease: "power2.out",
+          zIndex: 10,
         });
+        flipStateRef.current = null;
       }
     },
-    { dependencies: [candidates, isLoggedIn], scope: cardsContainerRef },
+    {
+      dependencies: [candidates, isLoggedIn, viewMode],
+      scope: cardsContainerRef,
+    },
   );
 
   useGSAP(() => {
@@ -272,6 +297,11 @@ export default function Comelec() {
         (payload) => {
           console.log("Realtime Payload Received:", payload);
           if (payload.new) {
+            const flipItems = document.querySelectorAll(".candidate-flip-item");
+            if (flipItems.length > 0) {
+              flipStateRef.current = Flip.getState(flipItems);
+            }
+
             setCandidates((prev) =>
               prev.map((candidate) =>
                 String(candidate.id) === String(payload.new.id)
@@ -581,12 +611,36 @@ export default function Comelec() {
             <h2 className="font-bold text-xl tracking-tight">
               Election Overview
             </h2>
-            <button
-              onClick={fetchCandidates}
-              className="p-2 text-slate-400 hover:text-primary transition-colors"
-              title="Refresh Data">
-              <BarChart3 size={20} className="" />
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
+                <button
+                  onClick={() => setViewMode("horizontal")}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    viewMode === "horizontal"
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-slate-400 hover:text-slate-600"
+                  }`}
+                  title="Grid View">
+                  <Grid size={18} />
+                </button>
+                <button
+                  onClick={() => setViewMode("vertical")}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    viewMode === "vertical"
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-slate-400 hover:text-slate-600"
+                  }`}
+                  title="List View">
+                  <AlignJustify size={18} />
+                </button>
+              </div>
+              <button
+                onClick={fetchCandidates}
+                className="p-2 ml-2 text-slate-400 hover:text-primary transition-colors"
+                title="Refresh Data">
+                <RefreshCw size={20} className="" />
+              </button>
+            </div>
           </div>
 
           {isFetchingCandidates && candidates.length === 0 ? (
@@ -595,46 +649,107 @@ export default function Comelec() {
             </div>
           ) : candidates.length > 0 ? (
             <div ref={cardsContainerRef} className="space-y-12">
-              {POSITIONS.map((position) => {
-                const candidatesInPosition = groupedCandidates[position] || [];
-                if (candidatesInPosition.length === 0) return null;
+              {organizations.map((org) => {
+                const orgCandidates = candidates.filter(
+                  (c) => (c.organization || "Independent") === org,
+                );
+
+                if (orgCandidates.length === 0) return null;
 
                 return (
-                  <div key={position} className="space-y-4">
-                    <div className="flex items-center justify-between px-2">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-1.5 bg-primary rounded-full" />
-                        <h3 className="text-xl font-black tracking-tight text-slate-800 uppercase">
-                          {position}
-                        </h3>
-                        <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg border border-slate-200">
-                          {candidatesInPosition.length}{" "}
-                          {candidatesInPosition.length === 1
-                            ? "Candidate"
-                            : "Candidates"}
-                        </span>
-                      </div>
+                  <div
+                    key={org}
+                    className="space-y-10 border-b border-slate-100 pb-12 last:border-0">
+                    <div className="flex items-center gap-4 relative overflow-hidden">
+                      <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tighter">
+                        {org}
+                      </h2>
+                      <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg">
+                        {orgCandidates.length} Candidates
+                      </span>
                     </div>
 
-                    <div className="overflow-hidden px-2 relative">
-                      <div className="flex gap-6 animate-marquee w-max">
-                        {/* Original Set */}
-                        {candidatesInPosition.map((candidate) => (
-                          <div
-                            key={`${candidate.id}-orig`}
-                            className="shrink-0 w-[280px] sm:w-[320px] md:w-auto">
-                            <CandidateCard candidate={candidate} />
+                    <div className="space-y-12 pl-2">
+                      {POSITIONS.map((position) => {
+                        const candidatesInPosition = orgCandidates
+                          .filter((c) => c.position === position)
+                          .sort(
+                            (a, b) => (b.vote_count || 0) - (a.vote_count || 0),
+                          );
+
+                        if (candidatesInPosition.length === 0) return null;
+
+                        return (
+                          <div key={position} className="space-y-4">
+                            <div className="flex items-center justify-between px-2">
+                              <div className="flex items-center gap-3">
+                                <div className="h-8 w-1.5 bg-primary rounded-full" />
+                                <h3 className="text-xl font-black tracking-tight text-slate-800 uppercase">
+                                  {position}
+                                </h3>
+                                <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg border border-slate-200">
+                                  {candidatesInPosition.length}{" "}
+                                  {candidatesInPosition.length === 1
+                                    ? "Candidate"
+                                    : "Candidates"}
+                                </span>
+                              </div>
+
+                              {viewMode === "horizontal" &&
+                                candidatesInPosition.length > 3 && (
+                                  <div className="hidden md:flex items-center gap-2">
+                                    <button
+                                      onClick={() =>
+                                        handleScroll(org, position, "left")
+                                      }
+                                      className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
+                                      <ChevronLeft size={20} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleScroll(org, position, "right")
+                                      }
+                                      className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
+                                      <ChevronRight size={20} />
+                                    </button>
+                                  </div>
+                                )}
+                            </div>
+
+                            {viewMode === "horizontal" ? (
+                              <div
+                                ref={(el) =>
+                                  (scrollContainerRefs.current[
+                                    `${org}-${position}`
+                                  ] = el)
+                                }
+                                className="flex gap-6 overflow-x-auto pb-6 pt-4 px-2 scroll-smooth no-scrollbar snap-x snap-mandatory">
+                                {candidatesInPosition.map((candidate) => (
+                                  <div
+                                    key={candidate.id}
+                                    data-flip-id={`flip-orig-${candidate.id}`}
+                                    className="candidate-flip-item snap-start shrink-0">
+                                    <CandidateCard candidate={candidate} />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="px-2 space-y-4">
+                                {candidatesInPosition.map((candidate) => (
+                                  <div
+                                    key={candidate.id}
+                                    data-flip-id={`flip-vert-${candidate.id}`}
+                                    className="candidate-flip-item relative w-full block">
+                                    <VerticalCandidateCardList
+                                      candidate={candidate}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        ))}
-                        {/* Cloned Set for Seamless Loop */}
-                        {candidatesInPosition.map((candidate) => (
-                          <div
-                            key={`${candidate.id}-clone`}
-                            className="shrink-0 w-[280px] sm:w-[320px] md:w-auto">
-                            <CandidateCard candidate={candidate} />
-                          </div>
-                        ))}
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
