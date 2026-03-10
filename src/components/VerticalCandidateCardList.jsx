@@ -35,7 +35,7 @@ export default function VerticalCandidateCardList({ candidate }) {
         {/* Details (Middle) */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg sm:text-xl font-bold text-slate-800 truncate">
+            <h3 className="text-md md:text-xl font-bold text-slate-800 truncate">
               {candidate.full_name}
             </h3>
             {candidate.partylist && (
@@ -48,7 +48,9 @@ export default function VerticalCandidateCardList({ candidate }) {
 
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 truncate">
             {candidate.position}{" "}
-            {candidate.organization ? `• ${candidate.organization}` : ""}
+            <span className="block md:inline">
+              {candidate.organization ? `• ${candidate.organization}` : ""}
+            </span>
           </p>
 
           <p className="text-sm text-slate-500 italic max-w-xl truncate">
@@ -57,10 +59,10 @@ export default function VerticalCandidateCardList({ candidate }) {
         </div>
 
         {/* Action & Stats (Right) */}
-        <div className="shrink-0 flex flex-col items-end justify-center gap-3 border-l border-slate-100 pl-4 sm:pl-6">
+        <div className="shrink-0 flex flex-col items-end justify-center gap-3 border-l border-slate-200 pl-4 sm:pl-6">
           <div className="text-right">
-            <p className="text-[10px] font-black uppercase text-accent/60 tracking-widest">
-              Votes Received
+            <p className=" text-[8px] md:text-[10px] font-black uppercase text-accent/60 tracking-widest">
+              Votes <span className="hidden md:inline">Received</span>
             </p>
             <p className="text-2xl font-black text-accent leading-none mt-1">
               {candidate.vote_count || 0}
@@ -69,9 +71,9 @@ export default function VerticalCandidateCardList({ candidate }) {
 
           <button
             onClick={() => setShowDetailModal(true)}
-            className="flex items-center gap-2 px-4 py-1.5 bg-slate-100 hover:bg-primary hover:text-white text-slate-600 rounded-full font-bold text-xs uppercase tracking-widest transition-colors mt-1">
+            className="flex items-center gap-2 px-2 md:px-4 py-1.5 bg-slate-100 hover:bg-primary hover:text-white text-slate-600 rounded-full font-bold text-xs uppercase tracking-widest transition-colors mt-1">
             <Info size={14} />
-            Info
+            <span className="hidden md:block">Info</span>
           </button>
         </div>
       </div>

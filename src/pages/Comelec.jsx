@@ -25,13 +25,10 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
-  AlignJustify,
-  Grid,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import gsap from "gsap";
 import { Flip } from "gsap/all";
-import CandidateCard from "../components/CandidateCard";
 import VerticalCandidateCardList from "../components/VerticalCandidateCardList";
 
 gsap.registerPlugin(Flip);
@@ -67,7 +64,7 @@ export default function Comelec() {
     platform: "",
   });
   const [partylists, setPartylists] = useState([]);
-  const [viewMode, setViewMode] = useState("horizontal"); // "horizontal" | "vertical"
+  const [selectedOrgs, setSelectedOrgs] = useState([]);
 
   // Refs for Animations
   const loginContainerRef = useRef(null);
@@ -78,6 +75,7 @@ export default function Comelec() {
   const modalContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const scrollContainerRefs = useRef({});
+  const chipsContainerRef = useRef(null);
   const flipStateRef = useRef(null);
 
   const POSITIONS = [
@@ -94,18 +92,20 @@ export default function Comelec() {
     ...new Set(candidates.map((c) => c.organization || "Independent")),
   ];
 
-  const handleScroll = (org, position, direction) => {
-    const container = scrollContainerRefs.current[`${org}-${position}`];
-    if (container) {
-      const scrollAmount = direction === "left" ? -400 : 400;
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
-
   const totalVotes = candidates.reduce(
     (acc, c) => acc + (c.vote_count || 0),
     0,
   );
+
+  const handleChipScroll = (direction) => {
+    if (chipsContainerRef.current) {
+      const scrollAmount = direction === "left" ? -200 : 200;
+      chipsContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   const fetchCandidates = async () => {
     setIsFetchingCandidates(true);
@@ -248,7 +248,7 @@ export default function Comelec() {
       }
     },
     {
-      dependencies: [candidates, isLoggedIn, viewMode],
+      dependencies: [candidates, isLoggedIn, selectedOrgs],
       scope: cardsContainerRef,
     },
   );
@@ -475,7 +475,7 @@ export default function Comelec() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter your username"
-                    className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
+                    className="placeholder:text-slate-400 w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                   />
                 </div>
               </div>
@@ -495,7 +495,7 @@ export default function Comelec() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-12 shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
+                    className="placeholder:text-slate-400 w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-12 shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                   />
                   <button
                     type="button"
@@ -611,37 +611,66 @@ export default function Comelec() {
             <h2 className="font-bold text-xl tracking-tight">
               Election Overview
             </h2>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
-                <button
-                  onClick={() => setViewMode("horizontal")}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    viewMode === "horizontal"
-                      ? "bg-white text-primary shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-                  title="Grid View">
-                  <Grid size={18} />
-                </button>
-                <button
-                  onClick={() => setViewMode("vertical")}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    viewMode === "vertical"
-                      ? "bg-white text-primary shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-                  title="List View">
-                  <AlignJustify size={18} />
-                </button>
-              </div>
+            <div className="flex items-center rounded-full bg-white p-2 ring-1 ring-primary/10">
               <button
                 onClick={fetchCandidates}
-                className="p-2 ml-2 text-slate-400 hover:text-primary transition-colors"
+                className={` text-slate-400 hover:text-primary transition-colors ${isFetchingCandidates && "animate-spin"}`}
                 title="Refresh Data">
                 <RefreshCw size={20} className="" />
               </button>
             </div>
           </div>
+
+          {candidates.length > 0 && (
+            <div className="relative group/chips flex items-center">
+              <button
+                onClick={() => handleChipScroll("left")}
+                className="absolute left-0 z-10 p-1.5 -ml-4 bg-white border border-slate-200 text-slate-500 rounded-full shadow-md opacity-0 group-hover/chips:opacity-100 transition-opacity hover:text-primary hover:border-primary/50 hidden md:block">
+                <ChevronLeft size={16} />
+              </button>
+
+              <div
+                ref={chipsContainerRef}
+                className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar w-full scroll-smooth mask-edges px-1">
+                <button
+                  onClick={() => setSelectedOrgs([])}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
+                    selectedOrgs.length === 0
+                      ? "bg-primary text-white shadow-md shadow-primary/20"
+                      : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-200"
+                  }`}>
+                  All Organizations
+                </button>
+                {organizations.map((org) => {
+                  const isActive = selectedOrgs.includes(org);
+                  return (
+                    <button
+                      key={org}
+                      onClick={() => {
+                        setSelectedOrgs((prev) =>
+                          prev.includes(org)
+                            ? prev.filter((o) => o !== org)
+                            : [...prev, org],
+                        );
+                      }}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
+                        isActive
+                          ? "bg-primary text-white shadow-md shadow-primary/20"
+                          : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-200"
+                      }`}>
+                      {org.length > 8 ? `${org.slice(0, 9)}...` : org}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => handleChipScroll("right")}
+                className="absolute right-0 z-10 p-1.5 -mr-4 bg-white border border-slate-200 text-slate-500 rounded-full shadow-md opacity-0 group-hover/chips:opacity-100 transition-opacity hover:text-primary hover:border-primary/50 hidden md:block">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
 
           {isFetchingCandidates && candidates.length === 0 ? (
             <div className="flex items-center pt-24 justify-center h-full w-full">
@@ -649,92 +678,55 @@ export default function Comelec() {
             </div>
           ) : candidates.length > 0 ? (
             <div ref={cardsContainerRef} className="space-y-12">
-              {organizations.map((org) => {
-                const orgCandidates = candidates.filter(
-                  (c) => (c.organization || "Independent") === org,
-                );
+              {(selectedOrgs.length === 0 ? organizations : selectedOrgs).map(
+                (org) => {
+                  const orgCandidates = candidates.filter(
+                    (c) => (c.organization || "Independent") === org,
+                  );
 
-                if (orgCandidates.length === 0) return null;
+                  if (orgCandidates.length === 0) return null;
 
-                return (
-                  <div
-                    key={org}
-                    className="space-y-10 border-b border-slate-100 pb-12 last:border-0">
-                    <div className="flex items-center gap-4 relative overflow-hidden">
-                      <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tighter">
-                        {org}
-                      </h2>
-                      <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg">
-                        {orgCandidates.length} Candidates
-                      </span>
-                    </div>
+                  return (
+                    <div
+                      key={org}
+                      className="space-y-10  bg-slate-50 ring-2 shadow-md ring-slate-200 pt-4 md:px-4 px-0 rounded-3xl pb-12 last:border-0">
+                      <div className="flex items-center gap-4 relative overflow-hidden">
+                        <h2 className="md:text-3xl ml-2 md:ml-0 text-xl  font-black text-slate-800 uppercase tracking-tighter">
+                          {org}
+                        </h2>
+                        <span className="text-center md:px-3 px-2  py-1 bg-primary/10 mr-2 md:mr-0 text-primary text-xs font-black rounded-lg">
+                          {orgCandidates.length} Candidates
+                        </span>
+                      </div>
+                      <div className="space-y-12 pl-2">
+                        {POSITIONS.map((position) => {
+                          const candidatesInPosition = orgCandidates
+                            .filter((c) => c.position === position)
+                            .sort(
+                              (a, b) =>
+                                (b.vote_count || 0) - (a.vote_count || 0),
+                            );
 
-                    <div className="space-y-12 pl-2">
-                      {POSITIONS.map((position) => {
-                        const candidatesInPosition = orgCandidates
-                          .filter((c) => c.position === position)
-                          .sort(
-                            (a, b) => (b.vote_count || 0) - (a.vote_count || 0),
-                          );
+                          if (candidatesInPosition.length === 0) return null;
 
-                        if (candidatesInPosition.length === 0) return null;
-
-                        return (
-                          <div key={position} className="space-y-4">
-                            <div className="flex items-center justify-between px-2">
-                              <div className="flex items-center gap-3">
-                                <div className="h-8 w-1.5 bg-primary rounded-full" />
-                                <h3 className="text-xl font-black tracking-tight text-slate-800 uppercase">
-                                  {position}
-                                </h3>
-                                <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg border border-slate-200">
-                                  {candidatesInPosition.length}{" "}
-                                  {candidatesInPosition.length === 1
-                                    ? "Candidate"
-                                    : "Candidates"}
-                                </span>
+                          return (
+                            <div key={position} className="space-y-4">
+                              <div className="flex items-center justify-between px-2">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-8 w-1.5 bg-primary rounded-full" />
+                                  <h3 className="text-xl font-black tracking-tight text-slate-800 uppercase">
+                                    {position}
+                                  </h3>
+                                  <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-black rounded-lg border border-slate-200">
+                                    {candidatesInPosition.length}{" "}
+                                    {candidatesInPosition.length === 1
+                                      ? "Candidate"
+                                      : "Candidates"}
+                                  </span>
+                                </div>
                               </div>
 
-                              {viewMode === "horizontal" &&
-                                candidatesInPosition.length > 3 && (
-                                  <div className="hidden md:flex items-center gap-2">
-                                    <button
-                                      onClick={() =>
-                                        handleScroll(org, position, "left")
-                                      }
-                                      className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
-                                      <ChevronLeft size={20} />
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        handleScroll(org, position, "right")
-                                      }
-                                      className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all shadow-sm">
-                                      <ChevronRight size={20} />
-                                    </button>
-                                  </div>
-                                )}
-                            </div>
-
-                            {viewMode === "horizontal" ? (
-                              <div
-                                ref={(el) =>
-                                  (scrollContainerRefs.current[
-                                    `${org}-${position}`
-                                  ] = el)
-                                }
-                                className="flex gap-6 overflow-x-auto pb-6 pt-4 px-2 scroll-smooth no-scrollbar snap-x snap-mandatory">
-                                {candidatesInPosition.map((candidate) => (
-                                  <div
-                                    key={candidate.id}
-                                    data-flip-id={`flip-orig-${candidate.id}`}
-                                    className="candidate-flip-item snap-start shrink-0">
-                                    <CandidateCard candidate={candidate} />
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="px-2 space-y-4">
+                              <div className="px-2 space-y-4 pt-3">
                                 {candidatesInPosition.map((candidate) => (
                                   <div
                                     key={candidate.id}
@@ -746,14 +738,14 @@ export default function Comelec() {
                                   </div>
                                 ))}
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           ) : (
             <div className="bg-white rounded-3xl border border-primary/10 p-12 text-center">

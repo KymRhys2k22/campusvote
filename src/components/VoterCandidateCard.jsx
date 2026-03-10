@@ -8,8 +8,6 @@ import {
   X,
   Megaphone,
   Quote,
-  BarChart3,
-  Briefcase,
 } from "lucide-react";
 
 export default function CandidateCard({ candidate, selected }) {
@@ -41,7 +39,7 @@ export default function CandidateCard({ candidate, selected }) {
         </div>
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
 
         {/* Selection Checkmark */}
         {selected && (
