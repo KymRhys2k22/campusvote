@@ -57,6 +57,13 @@ export default function Admin() {
   const loginContainerRef = useRef(null);
   const orgNavRef = useRef(null);
   const pdfTargetRef = useRef(null);
+  const prevCandidatesRef = useRef([]);
+  const candidateCardRefs = useRef(new Map());
+
+  const setCandidateRef = (id, el) => {
+    if (el) candidateCardRefs.current.set(String(id), el);
+    else candidateCardRefs.current.delete(String(id));
+  };
 
   const handleOrgScroll = (direction) => {
     if (orgNavRef.current) {
@@ -100,6 +107,73 @@ export default function Admin() {
       setIsLoading(false);
     }
   };
+
+  // --- REAL-TIME RANKING ANIMATIONS ---
+  useEffect(() => {
+    if (!candidates.length || !prevCandidatesRef.current.length) {
+      prevCandidatesRef.current = candidates;
+      return;
+    }
+
+    const prev = prevCandidatesRef.current;
+
+    candidates.forEach((curr) => {
+      const old = prev.find((p) => String(p.id) === String(curr.id));
+      if (!old) return;
+
+      const votesIncreased = (curr.vote_count || 0) > (old.vote_count || 0);
+      if (!votesIncreased) return;
+
+      const el = candidateCardRefs.current.get(String(curr.id));
+      if (!el) return;
+
+      // Flash ring pulse — green glow burst
+      gsap
+        .timeline()
+        .to(el, {
+          boxShadow: "0 0 0 4px #16a34a, 0 0 32px 8px rgba(22,163,74,0.35)",
+          scale: 1.03,
+          duration: 0.25,
+          ease: "power2.out",
+        })
+        .to(el, {
+          boxShadow: "none",
+          scale: 1,
+          duration: 0.6,
+          ease: "elastic.out(1, 0.5)",
+        });
+
+      // Animate the vote number counter element inside
+      const numEl = el.querySelector("[data-vote-count]");
+      if (numEl) {
+        gsap.fromTo(
+          numEl,
+          { color: "#16a34a", scale: 1.4, y: -8 },
+          {
+            color: "inherit",
+            scale: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "back.out(2)",
+          },
+        );
+      }
+    });
+
+    // Check if ranking order changed — animate stagger slide-in on runner-up grid
+    const prevOrder = prev.map((c) => String(c.id));
+    const currOrder = candidates.map((c) => String(c.id));
+    const orderChanged = prevOrder.some((id, i) => id !== currOrder[i]);
+    if (orderChanged) {
+      gsap.fromTo(
+        ".ranking-runner-card",
+        { y: 12, opacity: 0.5 },
+        { y: 0, opacity: 1, duration: 0.5, stagger: 0.07, ease: "power3.out" },
+      );
+    }
+
+    prevCandidatesRef.current = candidates;
+  }, [candidates]);
 
   // --- ENTRANCE ANIMATIONS (useGSAP) ---
   useGSAP(
@@ -372,7 +446,7 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="grow px-4 lg:px-10 py-6 lg:py-10">
+      <main className="grow px-4 lg:px-10 pt-6 pb-32 lg:py-10">
         <header className="mb-8 lg:mb-12">
           <h1 className="text-3xl lg:text-5xl font-black tracking-tight text-slate-800 leading-none">
             Election <br className="md:hidden" />
@@ -486,7 +560,9 @@ export default function Admin() {
 
                   {/* Top Candidate for this Position */}
                   {posLeader && (
-                    <div className="bg-white rounded-[2.5rem] lg:rounded-[3.5rem] p-8 lg:p-12 border border-primary/10 shadow-2xl shadow-primary/5 relative overflow-hidden transition-all duration-500 hover:shadow-primary/10 mb-8 lg:mb-10 group">
+                    <div
+                      ref={(el) => setCandidateRef(posLeader.id, el)}
+                      className="bg-white rounded-[2.5rem] lg:rounded-[3.5rem] p-8 lg:p-12 border border-primary/10 shadow-2xl shadow-primary/5 relative overflow-hidden transition-all duration-500 hover:shadow-primary/10 mb-8 lg:mb-10 group">
                       <div className="absolute top-12 -right-5">
                         <div className="bg-primary text-white text-[10px] lg:text-xs font-black pr-12 pl-18 py-3 rotate-45 translate-x-8 -translate-y-2 uppercase tracking-[0.2em] shadow-lg">
                           Leading Candidate
@@ -514,7 +590,9 @@ export default function Admin() {
                           </h3>
                           <div className="flex items-center justify-center md:justify-start gap-4">
                             <div className="px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center md:items-start">
-                              <span className="text-3xl lg:text-4xl font-black text-slate-800 tabular-nums leading-none">
+                              <span
+                                data-vote-count
+                                className="text-3xl lg:text-4xl font-black text-slate-800 tabular-nums leading-none">
                                 {(posLeader.vote_count || 0).toLocaleString()}
                               </span>
                               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
@@ -547,7 +625,8 @@ export default function Admin() {
                       {posCandidates.slice(1).map((candidate, index) => (
                         <div
                           key={candidate.id}
-                          className="bg-white rounded-4xl p-6 shadow-xl shadow-black/5 border border-slate-100 hover:border-primary/20 hover:shadow-primary/5 transition-all group relative overflow-hidden">
+                          ref={(el) => setCandidateRef(candidate.id, el)}
+                          className="ranking-runner-card bg-white rounded-4xl p-6 shadow-xl shadow-black/5 border border-slate-100 hover:border-primary/20 hover:shadow-primary/5 transition-all group relative overflow-hidden">
                           <div className="flex items-center gap-5 mb-5">
                             <div className="relative shrink-0">
                               <img
@@ -574,7 +653,9 @@ export default function Admin() {
 
                           <div className="flex items-end justify-between">
                             <div>
-                              <p className="text-2xl font-black text-slate-800 tabular-nums">
+                              <p
+                                data-vote-count
+                                className="text-2xl font-black text-slate-800 tabular-nums">
                                 {(candidate.vote_count || 0).toLocaleString()}
                               </p>
                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -616,24 +697,22 @@ export default function Admin() {
             </p>
           </div>
         )}
-
-        <section className="mt-8 px-4">
-          <div className="bg-primary/5 rounded-2xl p-5 flex items-center gap-4 border border-primary/10">
-            <div className="bg-primary/20 p-2.5 rounded-xl text-primary">
-              <TrendingUp size={24} />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold">Voter Engagement</h4>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Live rankings are updated every time a new ballot is cast. Stay
-                tuned for real-time changes!
-              </p>
-            </div>
-          </div>
-        </section>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 pb-8 pt-2 px-6 z-50"></nav>
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 pb-2 pt-2 px-6 z-50">
+        <div className="bg-primary/5 rounded-2xl p-5 flex items-center gap-4 border border-primary/10">
+          <div className="bg-primary/20 p-2.5 rounded-xl text-primary">
+            <TrendingUp size={24} />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold">Voter Engagement</h4>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Live rankings are updated every time a new ballot is cast. Stay
+              tuned for real-time changes!
+            </p>
+          </div>
+        </div>
+      </nav>
 
       {/* ── Hidden PDF Template ─────────────────────────────────── */}
       <div
