@@ -50,7 +50,8 @@ export default function Comelec() {
   // --- CLOUDINARY CONFIGURATION ---
   // Credentials for uploading candidate photos to Cloudinary.
   const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env
+    .VITE_CLOUDINARY_UPLOAD_PRESET;
   const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
   // --- LOGIN FORM STATE ---
@@ -424,7 +425,7 @@ export default function Comelec() {
     const sanitizedName = newCandidate.full_name
       ? newCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
       : file.name.split(".")[0];
-    formData.append("public_id", `candidate_${sanitizedName}_${Date.now()}`);
+    formData.append("public_id", `${sanitizedName}`);
 
     try {
       const response = await fetch(CLOUDINARY_UPLOAD_URL, {
