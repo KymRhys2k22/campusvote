@@ -335,7 +335,7 @@ export default function Admin() {
   return (
     <div className="font-display bg-background-light text-slate-900 min-h-screen">
       <header className="bg-white/80 sticky top-0 z-50 border-b border-primary/10 ios-blur">
-        <div className="px-5 py-4 lg:px-10 lg:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="px-5 py-4 lg:px-10 lg:py-6 flex flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 text-primary rounded-xl">
               <GraduationCap size={24} />
