@@ -181,28 +181,34 @@ export default function ElectionBallot() {
 
   return (
     <div className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col">
-      <header className=" bg-white/80 sticky top-0 z-40 border-b border-primary/10 ios-blur">
-        <div className="px-5 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-xl font-bold tracking-tight">
-              Election Ballot
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
-            <GraduationCap size={16} />
-            <span>University Student Council 2026</span>
-          </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-4">
-            <div
-              style={{ width: `${globalProgressPercent}%` }}
-              className="h-full bg-primary rounded-full transition-all duration-500 ease-in-out"></div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Overall Progress: {globalStats.totalSelected} /{" "}
-              {globalStats.totalPositions} Votes
-            </span>
+      <header className="bg-white/80 sticky top-0 z-40 border-b border-primary/10 ios-blur">
+        <div className="px-5 py-4 lg:px-10 lg:py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-xl lg:text-3xl font-black tracking-tight text-slate-800 uppercase">
+                Election Ballot
+              </h1>
+              <div className="flex items-center gap-2 text-slate-500 text-sm lg:text-base mt-1">
+                <GraduationCap size={18} className="text-primary" />
+                <span className="font-medium">University Student Council 2026</span>
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-end gap-2 shrink-0">
+              <div className="flex items-center justify-between w-full md:w-64 mb-1">
+                <span className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+                  Overall Progress
+                </span>
+                <span className="text-xs lg:text-sm font-black text-primary">
+                  {globalStats.totalSelected} / {globalStats.totalPositions} Votes
+                </span>
+              </div>
+              <div className="w-full md:w-64 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                <div
+                  style={{ width: `${globalProgressPercent}%` }}
+                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-lg"></div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -235,15 +241,16 @@ export default function ElectionBallot() {
           </div>
         ) : viewMode === "hub" ? (
           <div ref={contentRef} className="pb-24 grid gap-4">
-            <div className="mb-4">
-              <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
-                Select Organization
+            <div className="mb-8 lg:mb-12">
+              <h2 className="text-3xl lg:text-5xl font-black text-slate-800 uppercase tracking-tighter leading-none mb-3">
+                Select <br className="md:hidden" />
+                <span className="text-primary">Organization</span>
               </h2>
-              <p className="text-slate-500 text-sm">
-                Choose an organization to start voting for its candidates.
+              <p className="text-slate-500 text-sm lg:text-lg font-medium max-w-2xl">
+                Choose an organization to start voting for its candidates. Your progress is saved automatically.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {organizations.map((org) => {
                 const { totalSelected, totalPositions } = getOrgProgress(org);
                 const isComplete = totalSelected === totalPositions;

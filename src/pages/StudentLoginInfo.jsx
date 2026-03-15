@@ -140,26 +140,57 @@ function StudentLoginInfo() {
   return (
     <div
       ref={containerRef}
-      className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col">
-      {/* Header */}
-      <header
-        ref={headerRef}
-        className=" rounded-b-4xl md:rounded-b-full backdrop-blur-sm bg-white/80 sticky top-0 z-40 ios-blur border-b border-primary/10">
-        <div className="px-5 py-6 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
-            <User size={32} />
+      className="font-display text-slate-900 min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden p-6 md:p-12 transition-all duration-500">
+        
+        {/* Left Column: Branding (Visible on Desktop) */}
+        <div className="hidden lg:flex flex-col justify-center space-y-8 p-8 animate-in fade-in slide-in-from-left-8 duration-1000">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-2 ring-1 ring-primary/20">
+            <User size={44} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">
-            Student Login
-          </h1>
-          <p className="text-sm text-slate-500">
-            Verify your identity to proceed with the election.
-          </p>
+          <div className="space-y-4">
+            <h2 className="text-5xl font-black tracking-tight text-slate-800 leading-none">
+              Student <br />
+              <span className="text-primary underline decoration-accent/30 decoration-8 underline-offset-4">Identity</span>
+            </h2>
+            <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-md">
+              Welcome to the digital election portal. Please verify your credentials to cast your ballot securely.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/60 p-5 rounded-2xl border border-white/40 shadow-sm">
+              <CheckCircle2 className="text-emerald-500 mb-2" size={24} />
+              <h4 className="text-sm font-bold">Secure</h4>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Encrypted Transmission</p>
+            </div>
+            <div className="bg-white/60 p-5 rounded-2xl border border-white/40 shadow-sm">
+              <AlertCircle className="text-accent mb-2" size={24} />
+              <h4 className="text-sm font-bold">One Vote</h4>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Single Session Policy</p>
+            </div>
+          </div>
         </div>
-      </header>
 
-      <main className="grow mt-12 mb-24  px-6 py-8 max-w-md mx-auto w-full">
-        <form ref={formRef} onSubmit={handleVerify} className="space-y-6">
+        {/* Right Column: Login Form */}
+        <div className="flex flex-col w-full max-w-md mx-auto">
+          {/* Header (Mobile View) */}
+          <header
+            ref={headerRef}
+            className="lg:hidden text-center mb-10">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-6 shadow-sm border border-primary/5">
+              <User size={40} />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">
+              Student Login
+            </h1>
+            <p className="text-slate-500 font-medium">
+              Verify your identity to proceed with the election.
+            </p>
+          </header>
+
+          <main className="space-y-8">
+            <form ref={formRef} onSubmit={handleVerify} className="space-y-6">
           <div className="space-y-4">
             {/* Student Number Input */}
             <div className="animate-field">
@@ -229,43 +260,39 @@ function StudentLoginInfo() {
           )}
         </form>
 
-        {/* Auto filled Section */}
-        {studentData && (
-          <div
-            ref={dataSectionRef}
-            className="mt-12 mb-12 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Divider />
+            {studentData && (
+              <div
+                ref={dataSectionRef}
+                className="mt-8 space-y-6 p-6 bg-primary/5 border border-primary/10 rounded-4xl animate-in fade-in zoom-in-95">
+                <div className="flex items-center gap-3 mb-2 px-1">
+                  <CheckCircle2 size={24} className="text-emerald-500" />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">Student Record Found</h3>
+                </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 block px-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  readOnly
-                  value={studentData.name}
-                  className="w-full bg-slate-100 border-none rounded-xl py-3.5 px-4 text-slate-600 font-medium outline-none cursor-not-allowed"
-                />
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mb-1.5 block px-1">
+                      Full Name
+                    </label>
+                    <div className="px-5 py-3.5 bg-white rounded-xl text-slate-800 font-semibold ring-1 ring-primary/10 shadow-sm">
+                      {studentData.name}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mb-1.5 block px-1">
+                      Academic Section
+                    </label>
+                    <div className="px-5 py-3.5 bg-white rounded-xl text-slate-800 font-semibold ring-1 ring-primary/10 shadow-sm">
+                      {studentData.section}
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 block px-1">
-                  Section
-                </label>
-                <input
-                  type="text"
-                  readOnly
-                  value={studentData.section}
-                  className="w-full bg-slate-100 border-none rounded-xl py-3.5 px-4 text-slate-600 font-medium outline-none cursor-not-allowed"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Fixed Bottom Bar */}
+            )}
+          </main>
+        </div>
+      </div>
 
       <ProgressButtonBar
         navigateTo={studentData ? `/ballot/${studentData.student_number}` : ""}

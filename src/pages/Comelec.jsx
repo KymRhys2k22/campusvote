@@ -26,34 +26,50 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase"; // Our Supabase client for database operations
 import gsap from "gsap";
-import { Flip } from "gsap/all";
+import { Flip } from "gsap/all"; // GSAP Flip plugin for smooth layout transitions
 import VerticalCandidateCardList from "../components/VerticalCandidateCardList";
 
+// Register the Flip plugin with GSAP to enable its features
 gsap.registerPlugin(Flip);
 
+/**
+ * Comelec Component
+ * This is the management portal for the Election Commission (COMELEC).
+ * It handles admin authentication, candidate management (add/view),
+ * and provides real-time election statistics.
+ */
 export default function Comelec() {
+  // --- AUTHENTICATION STATE ---
+  // We use sessionStorage to persist the login state during the current browser session.
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return sessionStorage.getItem("comelec_session") === "active";
   });
+
+  // --- CLOUDINARY CONFIGURATION ---
+  // Credentials for uploading candidate photos to Cloudinary.
   const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const CLOUDINARY_UPLOAD_PRESET = import.meta.env
-    .VITE_CLOUDINARY_UPLOAD_PRESET;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
   const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
+  // --- LOGIN FORM STATE ---
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const [isFetchingCandidates, setIsFetchingCandidates] = useState(false);
-  const [candidates, setCandidates] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Controls the login button's loading spinner
 
-  // FAB & Modal State
-  const [showAddModal, setShowAddModal] = useState(false);
+  // --- ELECTION DATA STATE ---
+  const [candidates, setCandidates] = useState([]); // Array of all candidates from the database
+  const [partylists, setPartylists] = useState([]); // Array of all available partylists
+  const [isFetchingCandidates, setIsFetchingCandidates] = useState(false); // Loading state for data fetching
+  const [selectedOrgs, setSelectedOrgs] = useState([]); // Filter state for selected organizations
+
+  // --- CANDIDATE MANAGEMENT STATE ---
+  const [showAddModal, setShowAddModal] = useState(false); // Controls the visibility of the "Add Candidate" modal
+  const [isAdding, setIsAdding] = useState(false); // Loading state for candidate insertion
+  const [uploading, setUploading] = useState(false); // Loading state for image uploading
   const [newCandidate, setNewCandidate] = useState({
     full_name: "",
     position: "President",
@@ -63,10 +79,8 @@ export default function Comelec() {
     partylist: "",
     platform: "",
   });
-  const [partylists, setPartylists] = useState([]);
-  const [selectedOrgs, setSelectedOrgs] = useState([]);
 
-  // Refs for Animations
+  // --- REFS FOR ANIMATIONS & INTERACTIONS ---
   const loginContainerRef = useRef(null);
   const headerRef = useRef(null);
   const statsContainerRef = useRef(null);
@@ -76,8 +90,9 @@ export default function Comelec() {
   const fileInputRef = useRef(null);
   const scrollContainerRefs = useRef({});
   const chipsContainerRef = useRef(null);
-  const flipStateRef = useRef(null);
+  const flipStateRef = useRef(null); // Stores the state of elements before a FLIP animation
 
+  // CONSTANTS
   const POSITIONS = [
     "President",
     "Vice President",
@@ -88,15 +103,23 @@ export default function Comelec() {
     "Representative",
   ];
 
+  // --- DERIVED DATA ---
+  // We extract unique organizations from the candidates array.
+  // If a candidate has no organization, we label them as "Independent".
   const organizations = [
     ...new Set(candidates.map((c) => c.organization || "Independent")),
   ];
 
+  // Calculate the sum of all votes cast across all candidates.
   const totalVotes = candidates.reduce(
     (acc, c) => acc + (c.vote_count || 0),
     0,
   );
 
+  /**
+   * handleChipScroll
+   * Smoothly scrolls the organization filter chips horizontally.
+   */
   const handleChipScroll = (direction) => {
     if (chipsContainerRef.current) {
       const scrollAmount = direction === "left" ? -200 : 200;
@@ -107,6 +130,11 @@ export default function Comelec() {
     }
   };
 
+  /**
+   * fetchCandidates
+   * Retrieves all candidate records from the Supabase "candidates" table.
+   * We order them by position to maintain a consistent UI layout.
+   */
   const fetchCandidates = async () => {
     setIsFetchingCandidates(true);
     try {
@@ -124,6 +152,10 @@ export default function Comelec() {
     }
   };
 
+  /**
+   * fetchPartylists
+   * Retrieves all available partylists from the "partylist" table.
+   */
   const fetchPartylists = async () => {
     try {
       const { data, error: fetchError } = await supabase
@@ -138,9 +170,11 @@ export default function Comelec() {
     }
   };
 
+  // --- ENTRANCE ANIMATIONS (GSAP) ---
+  // This effect runs when the login state changes.
   useGSAP(() => {
     if (!isLoggedIn) {
-      // Login Entrance
+      // Login Entrance: Animate header, card, and footer elements into view.
       const tl = gsap.timeline();
       tl.from(".login-header > *", {
         y: -20,
@@ -179,7 +213,7 @@ export default function Comelec() {
           "-=0.4",
         );
     } else {
-      // Dashboard Entrance
+      // Dashboard Entrance: Animate the header, stat cards, and overview section.
       const tl = gsap.timeline();
       tl.from(".dashboard-header", {
         y: -100,
@@ -211,9 +245,13 @@ export default function Comelec() {
     }
   }, [isLoggedIn]);
 
+  // --- CANDIDATE CARD & FLIP ANIMATIONS ---
+  // This effect handles the smooth transitions of candidate cards,
+  // especially when they change positions due to real-time vote updates.
   useGSAP(
     () => {
       if (isLoggedIn && candidates.length > 0) {
+        // Entrance animation for NEWLY rendered candidate cards.
         gsap.fromTo(
           ".candidate-card:not([data-animated='true'])",
           {
@@ -238,6 +276,8 @@ export default function Comelec() {
         );
       }
 
+      // FLIP Animation: If we have a stored state, animate the transition from that state.
+      // This makes the cards "slide" to their new ranking smoothly.
       if (flipStateRef.current) {
         Flip.from(flipStateRef.current, {
           duration: 0.8,
@@ -253,6 +293,7 @@ export default function Comelec() {
     },
   );
 
+  // --- MODAL ANIMATIONS ---
   useGSAP(() => {
     if (showAddModal) {
       gsap.fromTo(
@@ -268,6 +309,8 @@ export default function Comelec() {
     }
   }, [showAddModal]);
 
+  // --- SESSION MANAGEMENT ---
+  // On first load, check if there's an active session in local storage.
   useEffect(() => {
     const session = sessionStorage.getItem("comelec_session");
     if (session === "active") {
@@ -275,6 +318,8 @@ export default function Comelec() {
     }
   }, []);
 
+  // --- INITIAL DATA FETCH ---
+  // Once logged in, fetch the necessary data from Supabase.
   useEffect(() => {
     if (isLoggedIn) {
       fetchCandidates();
@@ -282,6 +327,8 @@ export default function Comelec() {
     }
   }, [isLoggedIn]);
 
+  // --- REAL-TIME UPDATES (SUPABASE) ---
+  // This effect sets up a subscription to listen for ANY changes in the "candidates" table.
   useEffect(() => {
     if (!isLoggedIn) return;
 
@@ -290,18 +337,20 @@ export default function Comelec() {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "*", // Listen for INSERT, UPDATE, DELETE
           schema: "public",
           table: "candidates",
         },
         (payload) => {
           console.log("Realtime Payload Received:", payload);
           if (payload.new) {
+            // Before updating state, capture the current position of cards for FLIP animation.
             const flipItems = document.querySelectorAll(".candidate-flip-item");
             if (flipItems.length > 0) {
               flipStateRef.current = Flip.getState(flipItems);
             }
 
+            // Update the local state with the new data from Supabase.
             setCandidates((prev) =>
               prev.map((candidate) =>
                 String(candidate.id) === String(payload.new.id)
@@ -316,17 +365,23 @@ export default function Comelec() {
         console.log("Realtime Subscription Status:", status);
       });
 
+    // Cleanup: Remove the subscription when the component unmounts or user logs out.
     return () => {
       supabase.removeChannel(channel);
     };
   }, [isLoggedIn]);
 
+  /**
+   * handleLogin
+   * Authenticates the user based on environment variables.
+   * On success, sets the session cookie and updates the login state.
+   */
   const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Placeholder credentials
+    // Simulate network delay
     setTimeout(() => {
       if (
         username === import.meta.env.VITE_COMELEC_USERNAME &&
@@ -341,10 +396,16 @@ export default function Comelec() {
     }, 1000);
   };
 
+  /**
+   * handleImageUpload
+   * Uploads a selected file to Cloudinary.
+   * It uses FormData to send the file and upload preset to the Cloudinary API.
+   */
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Requirement: Enter name first to help name the file in Cloudinary.
     if (!newCandidate.full_name) {
       setError(
         "Please enter the candidate's name first to name the image correctly.",
@@ -359,7 +420,7 @@ export default function Comelec() {
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-    // Use full_name for public_id if available, otherwise use filename
+    // Sanitize the candidate name for use as the Cloudinary Public ID.
     const sanitizedName = newCandidate.full_name
       ? newCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
       : file.name.split(".")[0];
@@ -378,6 +439,7 @@ export default function Comelec() {
 
       const data = await response.json();
       console.log("Cloudinary Upload Success:", data);
+      // Store the resulting URL in the candidate state.
       setNewCandidate((prev) => ({ ...prev, image_url: data.secure_url }));
     } catch (err) {
       console.error("Upload error:", err);
@@ -387,12 +449,20 @@ export default function Comelec() {
     }
   };
 
+  /**
+   * handleLogout
+   * Clears the session and resets the local state.
+   */
   const handleLogout = () => {
     setIsLoggedIn(false);
     sessionStorage.removeItem("comelec_session");
     setCandidates([]);
   };
 
+  /**
+   * handleAddCandidate
+   * Inserts the new candidate data into the Supabase 'candidates' table.
+   */
   const handleAddCandidate = async (e) => {
     e.preventDefault();
     setIsAdding(true);
@@ -406,7 +476,7 @@ export default function Comelec() {
       organization: newCandidate.organization,
       partylist: newCandidate.partylist,
       platform: newCandidate.platform,
-      vote_count: 0,
+      vote_count: 0, // Initialize with 0 votes
     };
 
     console.log("Attempting to insert candidate:", candidateData);
@@ -420,6 +490,7 @@ export default function Comelec() {
 
       console.log("Candidate Added Successfully:", data);
       setShowAddModal(false);
+      // Reset form fields
       setNewCandidate({
         full_name: "",
         position: "President",
@@ -429,7 +500,7 @@ export default function Comelec() {
         partylist: "",
         platform: "",
       });
-      fetchCandidates(); // Refresh list after adding
+      fetchCandidates(); // Refresh list to show the new candidate
     } catch (err) {
       console.error("Error adding candidate:", err);
       setError(
@@ -440,6 +511,9 @@ export default function Comelec() {
     }
   };
 
+  // --- RENDER PHASE ---
+
+  // If the user is NOT logged in, we render the Login Screen.
   if (!isLoggedIn) {
     return (
       <div
@@ -537,8 +611,10 @@ export default function Comelec() {
     );
   }
 
+  // If the user IS logged in, we render the Dashboard.
   return (
     <div className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col relative overflow-x-hidden">
+      {/* HEADER SECTION: Includes logout button and branding */}
       <header
         ref={headerRef}
         className="bg-white/80 sticky top-0 z-40 ios-blur border-b border-primary/10 px-6 py-4 flex items-center justify-between dashboard-header">
@@ -564,6 +640,7 @@ export default function Comelec() {
       </header>
 
       <main className="grow p-6 max-w-6xl mx-auto w-full">
+        {/* STATISTICS CARDS: Displaying real-time election numbers */}
         <div
           ref={statsContainerRef}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -605,6 +682,7 @@ export default function Comelec() {
         </div>
 
         <div className="space-y-6">
+          {/* ELECTION OVERVIEW HEADER & DATA REFRESH */}
           <div
             ref={overviewHeaderRef}
             className="flex items-center justify-between overview-header">
@@ -621,6 +699,7 @@ export default function Comelec() {
             </div>
           </div>
 
+          {/* DASHBOARD CONTENT: Filters and Candidate Lists */}
           {candidates.length > 0 && (
             <div className="relative group/chips flex items-center">
               <button
@@ -678,6 +757,7 @@ export default function Comelec() {
             </div>
           ) : candidates.length > 0 ? (
             <div ref={cardsContainerRef} className="space-y-12">
+              {/* GROUPING LOGIC: We map over organizations, then filter candidates for each. */}
               {(selectedOrgs.length === 0 ? organizations : selectedOrgs).map(
                 (org) => {
                   const orgCandidates = candidates.filter(
@@ -699,6 +779,7 @@ export default function Comelec() {
                         </span>
                       </div>
                       <div className="space-y-12 pl-2">
+                        {/* SUB-GROUPING: Within each organization, group candidates by POSITION */}
                         {POSITIONS.map((position) => {
                           const candidatesInPosition = orgCandidates
                             .filter((c) => c.position === position)
@@ -762,7 +843,7 @@ export default function Comelec() {
         </div>
       </main>
 
-      {/* Floating Action Button (FAB) */}
+      {/* Floating Action Button (FAB): Triggers the modal to add a new candidate */}
       <button
         onClick={() => setShowAddModal(true)}
         className="fixed bottom-8 right-8 w-16 h-16 bg-accent/80 text-slate-900 rounded-2xl shadow-2xl shadow-accent/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-50 group">
@@ -773,6 +854,7 @@ export default function Comelec() {
       </button>
 
       {/* Add Candidate Modal */}
+      {/* Add Candidate Modal: A multi-step form (Upload -> Details -> Submit) */}
       <Activity mode={showAddModal ? "visible" : "hidden"}>
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6">
           <div
