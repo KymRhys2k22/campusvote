@@ -18,7 +18,9 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  FileDown,
 } from "lucide-react";
+import generatePDF from "react-to-pdf";
 import { supabase } from "../lib/supabase";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -54,6 +56,7 @@ export default function Admin() {
 
   const loginContainerRef = useRef(null);
   const orgNavRef = useRef(null);
+  const pdfTargetRef = useRef(null);
 
   const handleOrgScroll = (direction) => {
     if (orgNavRef.current) {
@@ -62,6 +65,15 @@ export default function Admin() {
         behavior: "smooth",
       });
     }
+  };
+
+  const downloadPDF = () => {
+    generatePDF(() => pdfTargetRef.current, {
+      filename: `CampusVote_Election_Results_${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).replace(/,\s/g, "_").replace(/\s/g, "_")}.pdf`,
+      method: "save",
+      canvas: { useCORS: true, logging: false },
+      page: { margin: 10, format: "A4" },
+    });
   };
 
   const fetchCandidates = async () => {
@@ -344,6 +356,13 @@ export default function Admin() {
               Live Feed
             </div>
             <button
+              onClick={downloadPDF}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-md shadow-primary/20"
+              title="Download Results PDF">
+              <FileDown size={16} />
+              <span className="hidden sm:inline">Export PDF</span>
+            </button>
+            <button
               onClick={handleLogout}
               className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
               title="Logout">
@@ -360,7 +379,7 @@ export default function Admin() {
             <span className="text-primary">Dashboard</span>
           </h1>
           <p className="text-slate-500 font-medium mt-2 lg:text-lg">
-            2024 General Student Elections
+            2026 General Student Elections
           </p>
         </header>
 
@@ -615,6 +634,218 @@ export default function Admin() {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 pb-8 pt-2 px-6 z-50"></nav>
+
+      {/* ── Hidden PDF Template ─────────────────────────────────── */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: "-9999px",
+          background: "white",
+        }}>
+        <div
+          ref={pdfTargetRef}
+          style={{
+            width: "210mm",
+            minHeight: "297mm",
+            padding: "18mm 20mm",
+            backgroundColor: "white",
+            fontFamily: "Arial, sans-serif",
+            color: "#1e293b",
+            boxSizing: "border-box",
+          }}>
+          {/* PDF Header */}
+          <div
+            style={{
+              borderBottom: "3px solid #16a34a",
+              paddingBottom: "14px",
+              marginBottom: "24px",
+            }}>
+            <h1
+              style={{
+                fontSize: "26px",
+                fontWeight: "900",
+                color: "#16a34a",
+                margin: "0 0 4px 0",
+                letterSpacing: "-0.5px",
+              }}>
+              🗳 CampusVote — Election Results
+            </h1>
+            <p style={{ color: "#64748b", fontSize: "13px", margin: "0" }}>
+              2026 General Student Elections &nbsp;•&nbsp; Winners per
+              Organization &amp; Position
+            </p>
+          </div>
+
+          {/* One section per org */}
+          {organizations.map((org) => {
+            const orgCandidates = candidates.filter(
+              (c) => (c.organization || "Independent") === org,
+            );
+            const hasAnyWinner = POSITIONS.some((pos) =>
+              orgCandidates.some((c) => c.position === pos),
+            );
+            if (!hasAnyWinner) return null;
+
+            return (
+              <div key={org} style={{ marginBottom: "28px" }}>
+                {/* Org header */}
+                <div
+                  style={{
+                    backgroundColor: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    marginBottom: "12px",
+                  }}>
+                  <h2
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "800",
+                      color: "#15803d",
+                      margin: 0,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}>
+                    {org}
+                  </h2>
+                </div>
+
+                {/* Position winners table */}
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "12px",
+                  }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "#f8fafc" }}>
+                      <th
+                        style={{
+                          textAlign: "left",
+                          padding: "7px 10px",
+                          color: "#94a3b8",
+                          fontWeight: "700",
+                          textTransform: "uppercase",
+                          fontSize: "10px",
+                          letterSpacing: "0.06em",
+                          borderBottom: "1px solid #e2e8f0",
+                          width: "30%",
+                        }}>
+                        Position
+                      </th>
+                      <th
+                        style={{
+                          textAlign: "left",
+                          padding: "7px 10px",
+                          color: "#94a3b8",
+                          fontWeight: "700",
+                          textTransform: "uppercase",
+                          fontSize: "10px",
+                          letterSpacing: "0.06em",
+                          borderBottom: "1px solid #e2e8f0",
+                        }}>
+                        Winner
+                      </th>
+                      <th
+                        style={{
+                          textAlign: "right",
+                          padding: "7px 10px",
+                          color: "#94a3b8",
+                          fontWeight: "700",
+                          textTransform: "uppercase",
+                          fontSize: "10px",
+                          letterSpacing: "0.06em",
+                          borderBottom: "1px solid #e2e8f0",
+                          width: "18%",
+                        }}>
+                        Votes
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {POSITIONS.map((pos) => {
+                      const posWinners = orgCandidates
+                        .filter((c) => c.position === pos)
+                        .sort(
+                          (a, b) => (b.vote_count || 0) - (a.vote_count || 0),
+                        );
+                      const winner = posWinners[0];
+                      if (!winner) return null;
+                      const posTotalVotes = posWinners.reduce(
+                        (s, c) => s + (c.vote_count || 0),
+                        0,
+                      );
+                      const pct =
+                        posTotalVotes > 0
+                          ? Math.round(
+                              (winner.vote_count / posTotalVotes) * 100,
+                            )
+                          : 0;
+                      return (
+                        <tr key={pos}>
+                          <td
+                            style={{
+                              padding: "8px 10px",
+                              borderBottom: "1px solid #f1f5f9",
+                              color: "#475569",
+                              fontWeight: "600",
+                            }}>
+                            {pos}
+                          </td>
+                          <td
+                            style={{
+                              padding: "8px 10px",
+                              borderBottom: "1px solid #f1f5f9",
+                              fontWeight: "700",
+                              color: "#0f172a",
+                            }}>
+                            {winner.full_name}
+                            <span
+                              style={{
+                                marginLeft: "8px",
+                                fontSize: "10px",
+                                color: "#16a34a",
+                                fontWeight: "600",
+                              }}>
+                              🏆 {pct}%
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              padding: "8px 10px",
+                              borderBottom: "1px solid #f1f5f9",
+                              textAlign: "right",
+                              fontWeight: "700",
+                              color: "#1e293b",
+                            }}>
+                            {(winner.vote_count || 0).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+
+          {/* PDF Footer */}
+          <div
+            style={{
+              borderTop: "1px solid #e2e8f0",
+              paddingTop: "12px",
+              marginTop: "24px",
+              fontSize: "11px",
+              color: "#94a3b8",
+              display: "flex",
+              justifyContent: "space-between",
+            }}>
+            <span>Generated: {new Date().toLocaleString()}</span>
+            <span>CampusVote — FEU Alabang</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
