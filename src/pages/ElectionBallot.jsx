@@ -31,10 +31,27 @@ export default function ElectionBallot() {
     "President",
     "Vice President",
     "Secretary",
+    "Assistant Secretary",
     "Treasurer",
+    "Chairman",
+    "Chairwoman",
+    "Vice Chairman",
+    "Vice Chairwoman",
+    "Editor-in-Chief",
+    "Associate Editor",
+    "Managing Editor",
+    "President for Internal",
+    "Vice President for Internal",
+    "Vice President for External",
+    "Public Relations Officer",
     "Auditor",
-    "PRO",
-    "Representative",
+    "Protocol Officer",
+    "Public Information Officer",
+    "Grade 12 Representative",
+    "Pangulo",
+    "Pangalawang Pangulo",
+    "Kalihim",
+    "Kawani ng Ugnayang Pampubliko",
   ];
 
   const scrollToTop = () => {
@@ -186,21 +203,22 @@ export default function ElectionBallot() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl lg:text-3xl font-black tracking-tight text-slate-800 uppercase">
-                Election Ballot
+                Halalan HUB
               </h1>
               <div className="flex items-center gap-2 text-slate-500 text-sm lg:text-base mt-1">
                 <GraduationCap size={18} className="text-primary" />
-                <span className="font-medium">University Student Council 2026</span>
+                <span className="font-medium">ATamHalalan 2026</span>
               </div>
             </div>
-            
+
             <div className="flex flex-col items-end gap-2 shrink-0">
               <div className="flex items-center justify-between w-full md:w-64 mb-1">
                 <span className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
                   Overall Progress
                 </span>
                 <span className="text-xs lg:text-sm font-black text-primary">
-                  {globalStats.totalSelected} / {globalStats.totalPositions} Votes
+                  {globalStats.totalSelected} / {globalStats.totalPositions}{" "}
+                  Votes
                 </span>
               </div>
               <div className="w-full md:w-64 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
@@ -247,7 +265,8 @@ export default function ElectionBallot() {
                 <span className="text-primary">Organization</span>
               </h2>
               <p className="text-slate-500 text-sm lg:text-lg font-medium max-w-2xl">
-                Choose an organization to start voting for its candidates. Your progress is saved automatically.
+                Choose an organization to start voting for its candidates. Your
+                progress is saved automatically.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

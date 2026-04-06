@@ -34,6 +34,49 @@ import VerticalCandidateCardList from "../components/VerticalCandidateCardList";
 // Register the Flip plugin with GSAP to enable its features
 gsap.registerPlugin(Flip);
 
+const organizationTitles = [
+  "President",
+  "Vice President",
+  "Secretary",
+  "Assistant Secretary",
+  "Treasurer",
+  "Chairman",
+  "Chairwoman",
+  "Vice Chairman",
+  "Vice Chairwoman",
+  "Editor-in-Chief",
+  "Associate Editor",
+  "Managing Editor",
+  "President for Internal",
+  "Vice President for Internal",
+  "Vice President for External",
+  "Public Relations Officer",
+  "Auditor",
+  "Protocol Officer",
+  "Public Information Officer",
+  "Grade 12 Representative",
+  "Pangulo",
+  "Pangalawang Pangulo",
+  "Kalihim",
+  "Kawani ng Ugnayang Pampubliko",
+];
+
+const studentOrganizations = [
+  "Senior High School Coordinating Council",
+  "Junior Entrepreneurs Society",
+  "STEM Student Committee",
+  "Parliamentary Society",
+  "Samahan ng mga Mag-aaral sa Filipino",
+  "Tamaraw Tech Troop",
+  "Artistic Tamaraws",
+  "FEU Southern Extensive Dancers",
+  "Tamaraws Musical Society",
+  "Teatrong Tamaraw",
+  "Youth for Christ",
+  "Every Nation Campus",
+  "SHS Recreation and Athletics Club",
+];
+
 /**
  * Comelec Component
  * This is the management portal for the Election Commission (COMELEC).
@@ -94,15 +137,7 @@ export default function Comelec() {
   const flipStateRef = useRef(null); // Stores the state of elements before a FLIP animation
 
   // CONSTANTS
-  const POSITIONS = [
-    "President",
-    "Vice President",
-    "Secretary",
-    "Treasurer",
-    "Auditor",
-    "PRO",
-    "Representative",
-  ];
+  const POSITIONS = organizationTitles;
 
   // --- DERIVED DATA ---
   // We extract unique organizations from the candidates array.
@@ -382,16 +417,25 @@ export default function Comelec() {
     setIsLoading(true);
     setError("");
 
-    // Simulate network delay
+    // Parse multi-account configuration from .env
+    let comelecAccounts = [];
+    try {
+      comelecAccounts = JSON.parse(import.meta.env.VITE_COMELEC_ACCOUNTS || "[]");
+    } catch (err) {
+      console.error("Error parsing comelec accounts from env:", err);
+    }
+
     setTimeout(() => {
-      if (
-        username === import.meta.env.VITE_COMELEC_USERNAME &&
-        password === import.meta.env.VITE_COMELEC_PASSWORD
-      ) {
+      const matchedAccount = comelecAccounts.find(
+        (acc) => acc.u === username && acc.p === password,
+      );
+
+      if (matchedAccount) {
         setIsLoggedIn(true);
         sessionStorage.setItem("comelec_session", "active");
+        sessionStorage.setItem("comelec_user", username);
       } else {
-        setError("Invalid username or password. Please try again.");
+        setError("Invalid Comelec credentials. Please try again.");
       }
       setIsLoading(false);
     }, 1000);
@@ -915,7 +959,7 @@ export default function Comelec() {
                           full_name: e.target.value,
                         }))
                       }
-                      placeholder="e.g. Maya Chen"
+                      placeholder="e.g. Dela Cruz, Juan"
                       className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
                     />
                   </div>
@@ -940,12 +984,14 @@ export default function Comelec() {
                         }))
                       }
                       className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
-                      <option>President</option>
-                      <option>Vice President</option>
-                      <option>Secretary</option>
-                      <option>Treasurer</option>
-                      <option>Auditor</option>
-                      <option>PRO</option>
+                      <option disabled value="">
+                        Select Position
+                      </option>
+                      {organizationTitles.map((title) => (
+                        <option key={title} value={title}>
+                          {title}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -960,8 +1006,7 @@ export default function Comelec() {
                       size={18}
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"
                     />
-                    <input
-                      type="text"
+                    <select
                       value={newCandidate.organization}
                       onChange={(e) =>
                         setNewCandidate((prev) => ({
@@ -969,9 +1014,16 @@ export default function Comelec() {
                           organization: e.target.value,
                         }))
                       }
-                      placeholder="e.g. Independent"
-                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
-                    />
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
+                      <option disabled value="">
+                        Select Organization
+                      </option>
+                      {studentOrganizations.map((org) => (
+                        <option key={org} value={org}>
+                          {org}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

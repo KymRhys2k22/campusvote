@@ -57,6 +57,7 @@ export default function Admin() {
   const loginContainerRef = useRef(null);
   const orgNavRef = useRef(null);
   const pdfTargetRef = useRef(null);
+  const fullResultsPdfTargetRef = useRef(null);
   const prevCandidatesRef = useRef([]);
   const candidateCardRefs = useRef(new Map());
 
@@ -76,7 +77,16 @@ export default function Admin() {
 
   const downloadPDF = () => {
     generatePDF(() => pdfTargetRef.current, {
-      filename: `CampusVote_Election_Results_${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).replace(/,\s/g, "_").replace(/\s/g, "_")}.pdf`,
+      filename: `ATamHalalan_Election_Results_${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).replace(/,\s/g, "_").replace(/\s/g, "_")}.pdf`,
+      method: "save",
+      canvas: { useCORS: true, logging: false },
+      page: { margin: 10, format: "A4" },
+    });
+  };
+
+  const downloadFullResultsPDF = () => {
+    generatePDF(() => fullResultsPdfTargetRef.current, {
+      filename: `ATamHalalan_Full_Tallies_${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).replace(/,\s/g, "_").replace(/\s/g, "_")}.pdf`,
       method: "save",
       canvas: { useCORS: true, logging: false },
       page: { margin: 10, format: "A4" },
@@ -267,14 +277,23 @@ export default function Admin() {
     setIsLoggingIn(true);
     setLoginError("");
 
-    // Use environment variables or fallback to demo credentials
-    const adminUsername = import.meta.env.VITE_ADMIN_USERNAME || "admin";
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
+    // Parse multi-account configuration from .env
+    let adminAccounts = [];
+    try {
+      adminAccounts = JSON.parse(import.meta.env.VITE_ADMIN_ACCOUNTS || "[]");
+    } catch (err) {
+      console.error("Error parsing admin accounts from env:", err);
+    }
 
     setTimeout(() => {
-      if (username === adminUsername && password === adminPassword) {
+      const matchedAccount = adminAccounts.find(
+        (acc) => acc.u === username && acc.p === password,
+      );
+
+      if (matchedAccount) {
         setIsLoggedIn(true);
         sessionStorage.setItem("admin_session", "active");
+        sessionStorage.setItem("admin_user", username);
       } else {
         setLoginError("Invalid admin credentials. Please try again.");
       }
@@ -431,10 +450,17 @@ export default function Admin() {
             </div>
             <button
               onClick={downloadPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-md shadow-primary/20"
-              title="Download Results PDF">
+              className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary/20 active:scale-95 transition-all shadow-sm"
+              title="Download Winners Only PDF">
               <FileDown size={16} />
-              <span className="hidden sm:inline">Export PDF</span>
+              <span className="hidden sm:inline">Winners Only</span>
+            </button>
+            <button
+              onClick={downloadFullResultsPDF}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-md shadow-primary/20"
+              title="Download Full Results PDF">
+              <FileDown size={16} />
+              <span className="hidden sm:inline">Export Full Tally</span>
             </button>
             <button
               onClick={handleLogout}
@@ -748,7 +774,7 @@ export default function Admin() {
                 margin: "0 0 4px 0",
                 letterSpacing: "-0.5px",
               }}>
-              🗳 CampusVote — Election Results
+              🗳 ATAMHALALAN — Election Results
             </h1>
             <p style={{ color: "#64748b", fontSize: "13px", margin: "0" }}>
               2026 General Student Elections &nbsp;•&nbsp; Winners per
@@ -909,19 +935,384 @@ export default function Admin() {
             );
           })}
 
+          {/* PDF Signature Section */}
+          <div style={{ marginTop: "80px" }}>Certified By:</div>
+          <div
+            style={{
+              marginTop: "160px",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "30px",
+              paddingBottom: "40px",
+            }}>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <div
+                style={{
+                  borderTop: "1.5px solid #1e293b",
+                  paddingTop: "10px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  color: "#0f172a",
+                }}>
+                Comelec
+              </div>
+            </div>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <div
+                style={{
+                  borderTop: "1.5px solid #1e293b",
+                  paddingTop: "10px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  color: "#0f172a",
+                }}>
+                SHS Representative
+              </div>
+            </div>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <div
+                style={{
+                  borderTop: "1.5px solid #1e293b",
+                  paddingTop: "10px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  color: "#0f172a",
+                }}>
+                SADU Representative
+              </div>
+            </div>
+          </div>
+
           {/* PDF Footer */}
           <div
             style={{
               borderTop: "1px solid #e2e8f0",
               paddingTop: "12px",
-              marginTop: "24px",
+              marginTop: "auto",
               fontSize: "11px",
               color: "#94a3b8",
               display: "flex",
               justifyContent: "space-between",
             }}>
             <span>Generated: {new Date().toLocaleString()}</span>
-            <span>CampusVote — FEU Alabang</span>
+            <span>ATamHalalan 2026</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Hidden PDF Template (Full Results) ───────────────────── */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: "-9999px",
+          background: "white",
+        }}>
+        <div
+          ref={fullResultsPdfTargetRef}
+          style={{
+            width: "210mm",
+            minHeight: "297mm",
+            padding: "18mm 20mm",
+            backgroundColor: "white",
+            fontFamily: "Arial, sans-serif",
+            color: "#1e293b",
+            boxSizing: "border-box",
+          }}>
+          {/* PDF Header */}
+          <div
+            style={{
+              borderBottom: "3px solid #16a34a",
+              paddingBottom: "14px",
+              marginBottom: "24px",
+            }}>
+            <h1
+              style={{
+                fontSize: "26px",
+                fontWeight: "900",
+                color: "#16a34a",
+                margin: "0 0 4px 0",
+                letterSpacing: "-0.5px",
+              }}>
+              🗳 ATAMHALALAN — Full Election Tallies & Rankings
+            </h1>
+            <p style={{ color: "#64748b", fontSize: "13px", margin: "0" }}>
+              2026 General Student Elections &nbsp;•&nbsp; Comprehensive Results
+              Breakdown
+            </p>
+          </div>
+
+          {/* One section per org */}
+          {organizations.map((org) => {
+            const orgCandidates = candidates.filter(
+              (c) => (c.organization || "Independent") === org,
+            );
+            const hasAnyCandidates = POSITIONS.some((pos) =>
+              orgCandidates.some((c) => c.position === pos),
+            );
+            if (!hasAnyCandidates) return null;
+
+            return (
+              <div key={org} style={{ marginBottom: "32px" }}>
+                {/* Org header */}
+                <div
+                  style={{
+                    backgroundColor: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    marginBottom: "16px",
+                  }}>
+                  <h2
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "800",
+                      color: "#15803d",
+                      margin: 0,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}>
+                    {org}
+                  </h2>
+                </div>
+
+                {/* Position tables */}
+                {POSITIONS.map((pos) => {
+                  const posCandidates = orgCandidates
+                    .filter((c) => c.position === pos)
+                    .sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
+
+                  if (posCandidates.length === 0) return null;
+
+                  const posTotalVotes = posCandidates.reduce(
+                    (s, c) => s + (c.vote_count || 0),
+                    0,
+                  );
+
+                  return (
+                    <div key={pos} style={{ marginBottom: "20px" }}>
+                      <h3
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: "800",
+                          color: "#64748b",
+                          textTransform: "uppercase",
+                          margin: "0 0 8px 4px",
+                          letterSpacing: "0.05em",
+                        }}>
+                        {pos}
+                      </h3>
+                      <table
+                        style={{
+                          width: "100%",
+                          borderCollapse: "collapse",
+                          fontSize: "11px",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #e2e8f0",
+                        }}>
+                        <thead>
+                          <tr style={{ backgroundColor: "#f8fafc" }}>
+                            <th
+                              style={{
+                                textAlign: "center",
+                                padding: "6px 10px",
+                                color: "#94a3b8",
+                                fontWeight: "700",
+                                borderBottom: "1px solid #e2e8f0",
+                                width: "10%",
+                              }}>
+                              Rank
+                            </th>
+                            <th
+                              style={{
+                                textAlign: "left",
+                                padding: "6px 10px",
+                                color: "#94a3b8",
+                                fontWeight: "700",
+                                borderBottom: "1px solid #e2e8f0",
+                              }}>
+                              Candidate Name
+                            </th>
+                            <th
+                              style={{
+                                textAlign: "right",
+                                padding: "6px 10px",
+                                color: "#94a3b8",
+                                fontWeight: "700",
+                                borderBottom: "1px solid #e2e8f0",
+                                width: "20%",
+                              }}>
+                              Votes
+                            </th>
+                            <th
+                              style={{
+                                textAlign: "right",
+                                padding: "6px 10px",
+                                color: "#94a3b8",
+                                fontWeight: "700",
+                                borderBottom: "1px solid #e2e8f0",
+                                width: "15%",
+                              }}>
+                              Share
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {posCandidates.map((candidate, idx) => {
+                            const isWinner = idx === 0;
+                            const pct =
+                              posTotalVotes > 0
+                                ? Math.round(
+                                    (candidate.vote_count / posTotalVotes) *
+                                      100,
+                                  )
+                                : 0;
+
+                            return (
+                              <tr
+                                key={candidate.id}
+                                style={{
+                                  backgroundColor: isWinner
+                                    ? "#f0fdf4"
+                                    : "transparent",
+                                }}>
+                                <td
+                                  style={{
+                                    padding: "8px 10px",
+                                    borderBottom: "1px solid #f1f5f9",
+                                    textAlign: "center",
+                                    fontWeight: "700",
+                                    color: isWinner ? "#16a34a" : "#64748b",
+                                  }}>
+                                  {idx + 1}
+                                  {idx === 0 ? "st" : idx === 1 ? "nd" : idx === 2 ? "rd" : "th"}
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "8px 10px",
+                                    borderBottom: "1px solid #f1f5f9",
+                                    fontWeight: isWinner ? "700" : "500",
+                                    color: isWinner ? "#0f172a" : "#475569",
+                                  }}>
+                                  {candidate.full_name}
+                                  {isWinner && (
+                                    <span
+                                      style={{
+                                        marginLeft: "8px",
+                                        fontSize: "9px",
+                                        backgroundColor: "#dcfce7",
+                                        color: "#166534",
+                                        padding: "2px 6px",
+                                        borderRadius: "4px",
+                                        textTransform: "uppercase",
+                                        fontWeight: "800",
+                                      }}>
+                                      Winner 🏆
+                                    </span>
+                                  )}
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "8px 10px",
+                                    borderBottom: "1px solid #f1f5f9",
+                                    textAlign: "right",
+                                    fontWeight: "700",
+                                    color: "#1e293b",
+                                  }}>
+                                  {(
+                                    candidate.vote_count || 0
+                                  ).toLocaleString()}
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "8px 10px",
+                                    borderBottom: "1px solid #f1f5f9",
+                                    textAlign: "right",
+                                    fontWeight: "600",
+                                    color: isWinner ? "#16a34a" : "#94a3b8",
+                                  }}>
+                                  {pct}%
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+
+          {/* PDF Signature Section */}
+          <div style={{ marginTop: "120px", fontSize: "14px", fontWeight: "700", color: "#64748b" }}>Certified By:</div>
+          <div
+            style={{
+              marginTop: "80px",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "30px",
+              paddingBottom: "40px",
+            }}>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <div
+                style={{
+                  borderTop: "1.5px solid #1e293b",
+                  paddingTop: "10px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  color: "#0f172a",
+                }}>
+                Comelec
+              </div>
+            </div>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <div
+                style={{
+                  borderTop: "1.5px solid #1e293b",
+                  paddingTop: "10px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  color: "#0f172a",
+                }}>
+                SHS Representative
+              </div>
+            </div>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <div
+                style={{
+                  borderTop: "1.5px solid #1e293b",
+                  paddingTop: "10px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  color: "#0f172a",
+                }}>
+                SADU Representative
+              </div>
+            </div>
+          </div>
+
+          {/* PDF Footer */}
+          <div
+            style={{
+              borderTop: "1px solid #e2e8f0",
+              paddingTop: "12px",
+              marginTop: "auto",
+              fontSize: "11px",
+              color: "#94a3b8",
+              display: "flex",
+              justifyContent: "space-between",
+            }}>
+            <span>Generated: {new Date().toLocaleString()}</span>
+            <span>ATamHalalan 2026</span>
           </div>
         </div>
       </div>
