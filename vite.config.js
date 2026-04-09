@@ -14,9 +14,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ["react", "react-dom", "react-router"],
-          supabase: ["@supabase/supabase-js"],
-          gsap: ["gsap", "@gsap/react"],
+          "vendor-react": ["react", "react-dom", "react-router"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-gsap": ["gsap", "@gsap/react"],
+          "vendor-pdf": ["react-to-pdf"],
+          "vendor-icons": ["lucide-react"],
         },
       },
     },

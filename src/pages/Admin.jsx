@@ -19,6 +19,17 @@ import {
   ChevronLeft,
   ChevronRight,
   FileDown,
+  Edit,
+  Trash2,
+  X,
+  Camera,
+  Upload,
+  Shield,
+  Briefcase,
+  Quote,
+  Check,
+  Plus,
+  RefreshCw,
 } from "lucide-react";
 import generatePDF from "react-to-pdf";
 import { supabase } from "../lib/supabase";
@@ -44,20 +55,70 @@ export default function Admin() {
   const [loginError, setLoginError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  // --- MANAGEMENT STATE ---
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCandidate, setEditingCandidate] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [candidateToDelete, setCandidateToDelete] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env
+    .VITE_CLOUDINARY_UPLOAD_PRESET;
+  const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
   const POSITIONS = [
     "President",
     "Vice President",
     "Secretary",
+    "Assistant Secretary",
     "Treasurer",
+    "Chairman",
+    "Chairwoman",
+    "Vice Chairman",
+    "Vice Chairwoman",
+    "Editor-in-Chief",
+    "Associate Editor",
+    "Managing Editor",
+    "President for Internal",
+    "Vice President for Internal",
+    "Vice President for External",
+    "Public Relations Officer",
     "Auditor",
-    "PRO",
-    "Representative",
+    "Protocol Officer",
+    "Public Information Officer",
+    "Grade 12 Representative",
+    "Pangulo",
+    "Pangalawang Pangulo",
+    "Kalihim",
+    "Kawani ng Ugnayang Pampubliko",
+  ];
+
+  const STUDENT_ORGANIZATIONS = [
+    "Senior High School Coordinating Council",
+    "Junior Entrepreneurs Society",
+    "STEM Student Committee",
+    "Parliamentary Society",
+    "Samahan ng mga Mag-aaral sa Filipino",
+    "Tamaraw Tech Troop",
+    "Artistic Tamaraws",
+    "FEU Southern Extensive Dancers",
+    "Tamaraws Musical Society",
+    "Teatrong Tamaraw",
+    "Youth for Christ",
+    "Every Nation Campus",
+    "SHS Recreation and Athletics Club",
   ];
 
   const loginContainerRef = useRef(null);
   const orgNavRef = useRef(null);
   const pdfTargetRef = useRef(null);
   const fullResultsPdfTargetRef = useRef(null);
+  const modalContainerRef = useRef(null);
+  const deleteConfirmRef = useRef(null);
+  const fileInputRef = useRef(null);
   const prevCandidatesRef = useRef([]);
   const candidateCardRefs = useRef(new Map());
 
@@ -223,6 +284,37 @@ export default function Admin() {
     { dependencies: [isLoggedIn], scope: loginContainerRef },
   );
 
+  // --- MANAGEMENT MODAL ANIMATIONS ---
+  useGSAP(() => {
+    if (showEditModal) {
+      gsap.fromTo(
+        ".modal-backdrop",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3 },
+      );
+      gsap.fromTo(
+        ".modal-content",
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" },
+      );
+    }
+  }, [showEditModal]);
+
+  useGSAP(() => {
+    if (showDeleteConfirm) {
+      gsap.fromTo(
+        ".confirm-backdrop",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3 },
+      );
+      gsap.fromTo(
+        ".confirm-content",
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "power2.out" },
+      );
+    }
+  }, [showDeleteConfirm]);
+
   useEffect(() => {
     if (isLoggedIn) {
       fetchCandidates();
@@ -306,6 +398,96 @@ export default function Admin() {
     sessionStorage.removeItem("admin_session");
   };
 
+  // --- CANDIDATE MANAGEMENT LOGIC ---
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    const sanitizedName = editingCandidate.full_name
+      ? editingCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+      : `update_${Date.now()}`;
+    formData.append("public_id", `${sanitizedName}`);
+
+    try {
+      const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+
+      const data = await response.json();
+      setEditingCandidate((prev) => ({ ...prev, image_url: data.secure_url }));
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Failed to upload image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleUpdateCandidate = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    setError("");
+
+    try {
+      const { error: updateError } = await supabase
+        .from("candidates")
+        .update({
+          full_name: editingCandidate.full_name,
+          position: editingCandidate.position,
+          organization: editingCandidate.organization,
+          partylist: editingCandidate.partylist,
+          platform: editingCandidate.platform,
+          quotes: editingCandidate.quotes,
+          image_url: editingCandidate.image_url,
+        })
+        .eq("id", editingCandidate.id);
+
+      if (updateError) throw updateError;
+
+      setShowEditModal(false);
+      setEditingCandidate(null);
+    } catch (err) {
+      console.error("Update error:", err);
+      setError(err.message || "Failed to update candidate.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteCandidate = async () => {
+    if (!candidateToDelete) return;
+    setIsProcessing(true);
+    setError("");
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("candidates")
+        .delete()
+        .eq("id", candidateToDelete.id);
+
+      if (deleteError) throw deleteError;
+
+      setShowDeleteConfirm(false);
+      setCandidateToDelete(null);
+    } catch (err) {
+      console.error("Delete error:", err);
+      setError(err.message || "Failed to delete candidate.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <div
@@ -314,7 +496,7 @@ export default function Admin() {
         <div className="w-full max-w-md">
           <div className="text-center mb-10 login-header">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-6 shadow-sm border border-primary/5">
-              <LayoutDashboard size={44} />
+              <img src="/admin.svg" alt="Logo" className="w-16 h-16" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight mb-2">
               Admin Portal
@@ -610,7 +792,28 @@ export default function Admin() {
                           </div>
                         </div>
 
-                        <div className="flex-1 text-center md:text-left">
+                        <div className="flex-1 text-center md:text-left relative">
+                          {/* Admin Action Buttons */}
+                          <div className="hidden absolute bottom-0 right-0  duration-700 group-hover:flex gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingCandidate({ ...posLeader });
+                                setShowEditModal(true);
+                              }}
+                              className="p-3 bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-2xl border border-slate-100 transition-all active:scale-95"
+                              title="Edit Candidate">
+                              <Edit size={20} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCandidateToDelete(posLeader);
+                                setShowDeleteConfirm(true);
+                              }}
+                              className="p-3 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-2xl border border-slate-100 transition-all active:scale-95"
+                              title="Delete Candidate">
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
                           <h3 className="text-4xl lg:text-6xl font-black text-slate-800 tracking-tighter leading-none mb-6">
                             {posLeader.full_name}
                           </h3>
@@ -674,6 +877,29 @@ export default function Admin() {
                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
                                 {index + 2}nd Runner up
                               </p>
+                            </div>
+                            {/* Runner-up Admin Actions */}
+                            <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingCandidate({ ...candidate });
+                                  setShowEditModal(true);
+                                }}
+                                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
+                                title="Edit">
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCandidateToDelete(candidate);
+                                  setShowDeleteConfirm(true);
+                                }}
+                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                title="Delete">
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </div>
 
@@ -1189,7 +1415,13 @@ export default function Admin() {
                                     color: isWinner ? "#16a34a" : "#64748b",
                                   }}>
                                   {idx + 1}
-                                  {idx === 0 ? "st" : idx === 1 ? "nd" : idx === 2 ? "rd" : "th"}
+                                  {idx === 0
+                                    ? "st"
+                                    : idx === 1
+                                      ? "nd"
+                                      : idx === 2
+                                        ? "rd"
+                                        : "th"}
                                 </td>
                                 <td
                                   style={{
@@ -1223,9 +1455,7 @@ export default function Admin() {
                                     fontWeight: "700",
                                     color: "#1e293b",
                                   }}>
-                                  {(
-                                    candidate.vote_count || 0
-                                  ).toLocaleString()}
+                                  {(candidate.vote_count || 0).toLocaleString()}
                                 </td>
                                 <td
                                   style={{
@@ -1250,7 +1480,15 @@ export default function Admin() {
           })}
 
           {/* PDF Signature Section */}
-          <div style={{ marginTop: "120px", fontSize: "14px", fontWeight: "700", color: "#64748b" }}>Certified By:</div>
+          <div
+            style={{
+              marginTop: "120px",
+              fontSize: "14px",
+              fontWeight: "700",
+              color: "#64748b",
+            }}>
+            Certified By:
+          </div>
           <div
             style={{
               marginTop: "80px",
@@ -1316,6 +1554,313 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      {/* ── Candidate Management Modals ───────────────────────────── */}
+
+      {/* 1. Edit Candidate Modal */}
+      {showEditModal && editingCandidate && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm modal-backdrop"
+            onClick={() => !isProcessing && setShowEditModal(false)}
+          />
+          <div
+            ref={modalContainerRef}
+            className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl border border-primary/10 overflow-hidden modal-content flex flex-col max-h-[90vh]">
+            <div className="px-8 py-6 border-b border-primary/5 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                  Edit <span className="text-primary">Candidate</span>
+                </h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                  Modify identity and platform
+                </p>
+              </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleUpdateCandidate}
+              className="p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+              {/* Photo Upload Area */}
+              <div className="flex flex-col items-center mb-4">
+                <div className="relative group">
+                  <div className="w-32 h-32 rounded-4xl bg-slate-50 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/40">
+                    {editingCandidate.image_url ? (
+                      <img
+                        src={editingCandidate.image_url}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Camera size={32} className="text-slate-300" />
+                    )}
+                    {uploading && (
+                      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                        <RefreshCw
+                          size={24}
+                          className="text-primary animate-spin"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current.click()}
+                    disabled={uploading}
+                    className="absolute -bottom-2 -right-2 p-3 bg-primary text-white rounded-2xl shadow-lg hover:scale-110 active:scale-95 transition-all">
+                    <Upload size={16} />
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+
+              <div className="space-y-4">
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Candidate Name
+                  </label>
+                  <div className="relative">
+                    <User
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      required
+                      type="text"
+                      value={editingCandidate.full_name}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          full_name: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Grid for Position & Org */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                      Position
+                    </label>
+                    <div className="relative">
+                      <LayoutDashboard
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <select
+                        value={editingCandidate.position}
+                        onChange={(e) =>
+                          setEditingCandidate({
+                            ...editingCandidate,
+                            position: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                        {POSITIONS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                      Organization
+                    </label>
+                    <div className="relative">
+                      <Shield
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <select
+                        value={editingCandidate.organization}
+                        onChange={(e) =>
+                          setEditingCandidate({
+                            ...editingCandidate,
+                            organization: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                        {STUDENT_ORGANIZATIONS.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                        <option value="Independent">Independent</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partylist */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Partylist
+                  </label>
+                  <div className="relative">
+                    <Briefcase
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="text"
+                      value={editingCandidate.partylist}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          partylist: e.target.value,
+                        })
+                      }
+                      placeholder="Enter partylist name"
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Platform */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Platform Summary
+                  </label>
+                  <div className="relative">
+                    <Megaphone
+                      size={18}
+                      className="absolute left-4 top-4 text-slate-400"
+                    />
+                    <textarea
+                      rows={3}
+                      value={editingCandidate.platform}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          platform: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Quotes */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Official Quote
+                  </label>
+                  <div className="relative">
+                    <Quote
+                      size={18}
+                      className="absolute left-4 top-4 text-slate-400"
+                    />
+                    <textarea
+                      rows={3}
+                      value={editingCandidate.quotes}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          quotes: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 text-red-500 rounded-2xl text-xs font-bold border border-red-100 flex items-center gap-2">
+                  <AlertCircle size={14} />
+                  {error}
+                </div>
+              )}
+
+              <div className="flex gap-4 pt-4 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  disabled={isProcessing}
+                  className="flex-1 px-6 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isProcessing || uploading}
+                  className="flex-[2] px-6 py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                  {isProcessing ? (
+                    <RefreshCw size={18} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={18} /> Update Details
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Delete Confirmation Modal */}
+      {showDeleteConfirm && candidateToDelete && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md confirm-backdrop"
+            onClick={() => !isProcessing && setShowDeleteConfirm(false)}
+          />
+          <div
+            ref={deleteConfirmRef}
+            className="relative w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl border border-red-100 overflow-hidden confirm-content p-8 text-center">
+            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Trash2 size={40} />
+            </div>
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-none mb-3">
+              Delete <span className="text-red-500">Candidate?</span>
+            </h3>
+            <p className="text-slate-500 font-medium leading-relaxed mb-8">
+              Are you sure you want to remove{" "}
+              <span className="font-bold text-slate-800">
+                {candidateToDelete.full_name}
+              </span>
+              ? This action cannot be undone and will remove all their data from
+              the election.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleDeleteCandidate}
+                disabled={isProcessing}
+                className="w-full py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-red-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                {isProcessing ? (
+                  <RefreshCw size={18} className="animate-spin" />
+                ) : (
+                  "Confirm Deletion"
+                )}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isProcessing}
+                className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
+                Keep Candidate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

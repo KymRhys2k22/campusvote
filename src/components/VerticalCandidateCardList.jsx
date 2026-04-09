@@ -5,12 +5,17 @@ import {
   Shield,
   Info,
   Quote,
-  BarChart3,
   X,
   Megaphone,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
-export default function VerticalCandidateCardList({ candidate }) {
+export default function VerticalCandidateCardList({
+  candidate,
+  onEdit,
+  onDelete,
+}) {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const hasImage = !!candidate.image_url;
 
@@ -69,12 +74,35 @@ export default function VerticalCandidateCardList({ candidate }) {
             </p>
           </div>
 
-          <button
-            onClick={() => setShowDetailModal(true)}
-            className="flex items-center gap-2 px-2 md:px-4 py-1.5 bg-slate-100 hover:bg-primary hover:text-white text-slate-600 rounded-full font-bold text-xs uppercase tracking-widest transition-colors mt-1">
-            <Info size={14} />
-            <span className="hidden md:block">Info</span>
-          </button>
+          <div className="flex items-center gap-2 mt-1">
+            <button
+              onClick={() => setShowDetailModal(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-primary hover:text-white text-slate-600 rounded-full font-bold text-[10px] uppercase tracking-widest transition-colors shadow-sm"
+              title="View Details">
+              <Info size={14} />
+              <span className="hidden md:block">Info</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(candidate);
+              }}
+              className="p-1.5 bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-full border border-slate-100 transition-all active:scale-95"
+              title="Edit">
+              <Edit size={14} />
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(candidate);
+              }}
+              className="p-1.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-full border border-slate-100 transition-all active:scale-95"
+              title="Delete">
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
       </div>
 

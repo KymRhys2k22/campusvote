@@ -25,6 +25,9 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
+  Edit,
+  Trash2,
+  Check,
 } from "lucide-react";
 import { supabase } from "../lib/supabase"; // Our Supabase client for database operations
 import gsap from "gsap";
@@ -62,19 +65,29 @@ const organizationTitles = [
 ];
 
 const studentOrganizations = [
-  "Senior High School Coordinating Council",
-  "Junior Entrepreneurs Society",
-  "STEM Student Committee",
-  "Parliamentary Society",
-  "Samahan ng mga Mag-aaral sa Filipino",
-  "Tamaraw Tech Troop",
-  "Artistic Tamaraws",
-  "FEU Southern Extensive Dancers",
-  "Tamaraws Musical Society",
-  "Teatrong Tamaraw",
-  "Youth for Christ",
-  "Every Nation Campus",
-  "SHS Recreation and Athletics Club",
+  {
+    acronym: "SHS CC",
+    OrganizationFullName: "Senior High School Coordinating Council",
+  },
+  {
+    acronym: "SHS_RAC",
+    OrganizationFullName: "SHS Recreation and Athletics Club",
+  },
+  { acronym: "JES", OrganizationFullName: "Junior Entrepreneurs Society" },
+  { acronym: "STEM SC", OrganizationFullName: "STEM Student Committee" },
+  { acronym: "PARSOC", OrganizationFullName: "Parliamentary Society" },
+  {
+    acronym: "SAMFIL",
+    OrganizationFullName: "Samahan ng mga Mag-aaral sa Filipino",
+  },
+  { acronym: "3T", OrganizationFullName: "Tamaraw Tech Troop" },
+  { acronym: "ARTAMS", OrganizationFullName: "Artistic Tamaraws" },
+  { acronym: "FEUSED", OrganizationFullName: "FEU Southern Extensive Dancers" },
+  { acronym: "TAMS", OrganizationFullName: "Tamaraws Musical Society" },
+  { acronym: "TNT", OrganizationFullName: "Teatrong Tamaraw" },
+  { acronym: "YFC", OrganizationFullName: "Youth for Christ" },
+  { acronym: "ENC", OrganizationFullName: "Every Nation Campus" },
+  { acronym: "TGH", OrganizationFullName: "The Green Herald" },
 ];
 
 /**
@@ -90,8 +103,7 @@ export default function Comelec() {
     return sessionStorage.getItem("comelec_session") === "active";
   });
 
-  // --- CLOUDINARY CONFIGURATION ---
-  // Credentials for uploading candidate photos to Cloudinary.
+  // --- CONFIGURATION ---
   const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const CLOUDINARY_UPLOAD_PRESET = import.meta.env
     .VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -101,7 +113,6 @@ export default function Comelec() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Controls the login button's loading spinner
 
   // --- ELECTION DATA STATE ---
@@ -114,18 +125,27 @@ export default function Comelec() {
     return sessionStorage.getItem("comelec_user");
   });
   // --- CANDIDATE MANAGEMENT STATE ---
-  const [showAddModal, setShowAddModal] = useState(false); // Controls the visibility of the "Add Candidate" modal
-  const [isAdding, setIsAdding] = useState(false); // Loading state for candidate insertion
-  const [uploading, setUploading] = useState(false); // Loading state for image uploading
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
   const [newCandidate, setNewCandidate] = useState({
     full_name: "",
     position: "President",
     quotes: "",
     image_url: "",
     organization: "",
+    acronym: "",
     partylist: "",
     platform: "",
   });
+
+  // --- MANAGEMENT STATE ---
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCandidate, setEditingCandidate] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [candidateToDelete, setCandidateToDelete] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // --- REFS FOR ANIMATIONS & INTERACTIONS ---
   const loginContainerRef = useRef(null);
@@ -361,6 +381,36 @@ export default function Comelec() {
     }
   }, [showAddModal]);
 
+  useGSAP(() => {
+    if (showEditModal) {
+      gsap.fromTo(
+        ".modal-backdrop",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3 },
+      );
+      gsap.fromTo(
+        ".edit-modal-content",
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" },
+      );
+    }
+  }, [showEditModal]);
+
+  useGSAP(() => {
+    if (showDeleteConfirm) {
+      gsap.fromTo(
+        ".confirm-backdrop",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3 },
+      );
+      gsap.fromTo(
+        ".confirm-content",
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "power2.out" },
+      );
+    }
+  }, [showDeleteConfirm]);
+
   // --- SESSION MANAGEMENT ---
   // On first load, check if there's an active session in local storage.
   useEffect(() => {
@@ -385,7 +435,7 @@ export default function Comelec() {
     if (!isLoggedIn) return;
 
     const channel = supabase
-      .channel("vote_realtime")
+      .channel("live_results")
       .on(
         "postgres_changes",
         {
@@ -537,6 +587,7 @@ export default function Comelec() {
       quotes: newCandidate.quotes,
       image_url: newCandidate.image_url,
       organization: newCandidate.organization,
+      acronym: newCandidate.acronym,
       partylist: newCandidate.partylist,
       platform: newCandidate.platform,
       vote_count: 0, // Initialize with 0 votes
@@ -560,6 +611,7 @@ export default function Comelec() {
         quotes: "",
         image_url: "",
         organization: "",
+        acronym: "",
         partylist: "",
         platform: "",
       });
@@ -571,6 +623,95 @@ export default function Comelec() {
       );
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleUpdateCandidate = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    setError("");
+
+    try {
+      const { error: updateError } = await supabase
+        .from("candidates")
+        .update({
+          full_name: editingCandidate.full_name,
+          position: editingCandidate.position,
+          organization: editingCandidate.organization,
+          acronym: editingCandidate.acronym,
+          partylist: editingCandidate.partylist,
+          platform: editingCandidate.platform,
+          quotes: editingCandidate.quotes,
+          image_url: editingCandidate.image_url,
+        })
+        .eq("id", editingCandidate.id);
+
+      if (updateError) throw updateError;
+
+      setShowEditModal(false);
+      setEditingCandidate(null);
+    } catch (err) {
+      console.error("Update error:", err);
+      setError(err.message || "Failed to update candidate.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteCandidate = async () => {
+    if (!candidateToDelete) return;
+    setIsProcessing(true);
+    setError("");
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("candidates")
+        .delete()
+        .eq("id", candidateToDelete.id);
+
+      if (deleteError) throw deleteError;
+
+      setShowDeleteConfirm(false);
+      setCandidateToDelete(null);
+    } catch (err) {
+      console.error("Delete error:", err);
+      setError(err.message || "Failed to delete candidate.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleEditImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    const sanitizedName = editingCandidate.full_name
+      ? editingCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+      : `update_${Date.now()}`;
+    formData.append("public_id", `${sanitizedName}`);
+
+    try {
+      const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+
+      const data = await response.json();
+      setEditingCandidate((prev) => ({ ...prev, image_url: data.secure_url }));
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Failed to upload image.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -882,6 +1023,15 @@ export default function Comelec() {
                                     className="candidate-flip-item relative w-full block">
                                     <VerticalCandidateCardList
                                       candidate={candidate}
+                                      onEdit={(c) => {
+                                        setEditingCandidate({ ...c });
+                                        setShowEditModal(true);
+                                      }}
+                                      onDelete={(c) => {
+                                        setCandidateToDelete(c);
+                                        setShowDeleteConfirm(true);
+                                        fetchCandidates();
+                                      }}
                                     />
                                   </div>
                                 ))}
@@ -1030,22 +1180,50 @@ export default function Comelec() {
                     />
                     <select
                       value={newCandidate.organization}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const orgName = e.target.value;
+                        const orgObj = studentOrganizations.find(
+                          (o) => o.OrganizationFullName === orgName,
+                        );
                         setNewCandidate((prev) => ({
                           ...prev,
-                          organization: e.target.value,
-                        }))
-                      }
+                          organization: orgName,
+                          acronym: orgObj ? orgObj.acronym : "IND",
+                        }));
+                      }}
                       className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
                       <option disabled value="">
                         Select Organization
                       </option>
                       {studentOrganizations.map((org) => (
-                        <option key={org} value={org}>
-                          {org}
+                        <option
+                          key={org.acronym}
+                          value={org.OrganizationFullName}>
+                          {org.OrganizationFullName}
                         </option>
                       ))}
+                      <option value="Independent">Independent</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* Acronym Display */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block px-1">
+                    Organization Acronym
+                  </label>
+                  <div className="relative group">
+                    <Shield
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50"
+                    />
+                    <input
+                      type="text"
+                      disabled
+                      value={newCandidate.acronym}
+                      placeholder="Automatically filled..."
+                      className="w-full bg-slate-100 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 text-slate-500 font-bold outline-none cursor-not-allowed"
+                    />
                   </div>
                 </div>
 
@@ -1189,6 +1367,340 @@ export default function Comelec() {
           </div>
         </div>
       </Activity>
+
+      {/* ── Candidate Management Modals ───────────────────────────── */}
+
+      {/* 1. Edit Candidate Modal */}
+      {showEditModal && editingCandidate && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm modal-backdrop"
+            onClick={() => !isProcessing && setShowEditModal(false)}
+          />
+          <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl border border-primary/10 overflow-hidden edit-modal-content flex flex-col max-h-[90vh]">
+            <div className="px-8 py-6 border-b border-primary/5 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                  Edit <span className="text-primary">Candidate</span>
+                </h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                  Modify identity and platform
+                </p>
+              </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleUpdateCandidate}
+              className="p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+              {/* Photo Upload Area */}
+              <div className="flex flex-col items-center mb-4">
+                <div className="relative group">
+                  <div className="w-32 h-32 rounded-4xl bg-slate-50 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/40">
+                    {editingCandidate.image_url ? (
+                      <img
+                        src={editingCandidate.image_url}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Camera size={32} className="text-slate-300" />
+                    )}
+                    {uploading && (
+                      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                        <RefreshCw
+                          size={24}
+                          className="text-primary animate-spin"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current.click()}
+                    disabled={uploading}
+                    className="absolute -bottom-2 -right-2 p-3 bg-primary text-white rounded-2xl shadow-lg hover:scale-110 active:scale-95 transition-all">
+                    <Upload size={16} />
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleEditImageUpload}
+                  className="hidden"
+                />
+              </div>
+
+              <div className="space-y-4">
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Candidate Name
+                  </label>
+                  <div className="relative">
+                    <User
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      required
+                      type="text"
+                      value={editingCandidate.full_name}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          full_name: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Grid for Position & Org */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                      Position
+                    </label>
+                    <div className="relative">
+                      <LayoutDashboard
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <select
+                        value={editingCandidate.position}
+                        onChange={(e) =>
+                          setEditingCandidate({
+                            ...editingCandidate,
+                            position: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                        {POSITIONS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                      Organization
+                    </label>
+                    <div className="relative">
+                      <Shield
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+                      <select
+                        value={editingCandidate.organization}
+                        onChange={(e) => {
+                          const orgName = e.target.value;
+                          const orgObj = studentOrganizations.find(
+                            (o) => o.OrganizationFullName === orgName,
+                          );
+                          setEditingCandidate({
+                            ...editingCandidate,
+                            organization: orgName,
+                            acronym: orgObj ? orgObj.acronym : "IND",
+                          });
+                        }}
+                        className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                        {studentOrganizations.map((o) => (
+                          <option
+                            key={o.acronym}
+                            value={o.OrganizationFullName}>
+                            {o.OrganizationFullName}
+                          </option>
+                        ))}
+                        <option value="Independent">Independent</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                      Organization Acronym
+                    </label>
+                    <div className="relative">
+                      <Shield
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50"
+                      />
+                      <input
+                        type="text"
+                        disabled
+                        value={editingCandidate.acronym}
+                        className="w-full bg-slate-100 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 text-slate-500 font-bold outline-none cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partylist */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Partylist
+                  </label>
+                  <div className="relative">
+                    <Briefcase
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <select
+                      value={editingCandidate.partylist}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          partylist: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none">
+                      <option disabled value="">
+                        Select Partylist
+                      </option>
+                      <option value="Independent">Independent</option>
+                      {partylists.map((pl) => (
+                        <option key={pl.id} value={pl.name}>
+                          {pl.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Platform */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Platform Summary
+                  </label>
+                  <div className="relative">
+                    <Megaphone
+                      size={18}
+                      className="absolute left-4 top-4 text-slate-400"
+                    />
+                    <textarea
+                      rows={3}
+                      value={editingCandidate.platform}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          platform: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Quotes */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
+                    Official Quote
+                  </label>
+                  <div className="relative">
+                    <Quote
+                      size={18}
+                      className="absolute left-4 top-4 text-slate-400"
+                    />
+                    <textarea
+                      rows={3}
+                      value={editingCandidate.quotes}
+                      onChange={(e) =>
+                        setEditingCandidate({
+                          ...editingCandidate,
+                          quotes: e.target.value,
+                        })
+                      }
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 text-red-500 rounded-2xl text-xs font-bold border border-red-100 flex items-center gap-2">
+                  <AlertCircle size={14} />
+                  {error}
+                </div>
+              )}
+
+              <div className="flex gap-4 pt-4 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  disabled={isProcessing}
+                  className="flex-1 px-6 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isProcessing || uploading}
+                  className="flex-[2] px-6 py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                  {isProcessing ? (
+                    <RefreshCw size={18} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={18} /> Update Details
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Delete Confirmation Modal */}
+      {showDeleteConfirm && candidateToDelete && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md confirm-backdrop"
+            onClick={() => !isProcessing && setShowDeleteConfirm(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl border border-red-100 overflow-hidden confirm-content p-8 text-center">
+            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Trash2 size={40} />
+            </div>
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-none mb-3">
+              Delete <span className="text-red-500">Candidate?</span>
+            </h3>
+            <p className="text-slate-500 font-medium leading-relaxed mb-8">
+              Are you sure you want to remove{" "}
+              <span className="font-bold text-slate-800">
+                {candidateToDelete.full_name}
+              </span>
+              ? This action cannot be undone and will remove all their data from
+              the election.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleDeleteCandidate}
+                disabled={isProcessing}
+                className="w-full py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-red-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                {isProcessing ? (
+                  <RefreshCw size={18} className="animate-spin" />
+                ) : (
+                  "Confirm Deletion"
+                )}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isProcessing}
+                className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
+                Keep Candidate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
