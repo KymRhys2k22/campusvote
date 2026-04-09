@@ -233,20 +233,29 @@ export default function ElectionBallot() {
 
       <main className="grow px-4 py-6">
         <Activity mode={viewMode === "voting" ? "visible" : "hidden"}>
-          <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8">
-            <div className="flex gap-3">
-              <Info size={20} className="text-primary shrink-0" />
+          <div className="bg-primary/5 border border-primary/10 rounded-3xl p-6 mb-8 shadow-sm">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-primary/5">
+                <img
+                  src={`/${
+                    candidates.find(
+                      (c) => (c.organization || "Independent") === activeOrg,
+                    )?.acronym
+                  }.webp`}
+                  alt={activeOrg}
+                  className="w-full h-full object-contain"
+                />
+              </div>
               <div>
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">
                   Now Voting For:
                 </p>
-                <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">
+                <h2 className="text-2xl lg:text-3xl font-black text-slate-800 uppercase tracking-tighter leading-none">
                   {activeOrg}
                 </h2>
-                <p className="text-sm leading-relaxed text-slate-700 mt-2">
-                  Please select{" "}
-                  <span className="font-bold text-primary">one (1)</span>{" "}
-                  candidate for each position below.
+                <p className="text-xs lg:text-sm font-medium text-slate-500 mt-2">
+                  Select <span className="font-bold text-primary">one (1)</span>{" "}
+                  candidate for each position.
                 </p>
               </div>
             </div>
@@ -277,27 +286,47 @@ export default function ElectionBallot() {
                   <button
                     key={org}
                     onClick={() => handleEnterOrg(org)}
-                    className={`p-6 rounded-3xl border text-left transition-all ${
+                    className={`group relative overflow-hidden p-6 rounded-3xl border text-left transition-all ${
                       isComplete
                         ? "bg-green-50 border-green-200"
                         : "bg-white border-slate-200 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5"
                     }`}>
-                    <div className="flex flex-col h-full justify-between gap-4">
+                    {/* Background Logo */}
+                    <div className="absolute top-1/2 -right-10 -translate-y-1/2 w-48 h-48 opacity-50 group-hover:opacity-60 transition-opacity pointer-events-none rotate-12 blur-[1px]">
+                      <img
+                        src={`/${
+                          candidates.find(
+                            (c) => (c.organization || "Independent") === org,
+                          )?.acronym
+                        }.webp`}
+                        alt=""
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+
+                    <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span
-                            className={`px-2.5 py-0.5 text-[10px] font-black rounded-lg uppercase tracking-wider ${
-                              isComplete
-                                ? "bg-green-500 text-white"
-                                : "bg-slate-100 text-slate-500"
-                            }`}>
-                            {isComplete ? "Complete" : "In Progress"}
-                          </span>
-                          {isComplete && (
-                            <CheckCircle size={16} className="text-green-500" />
-                          )}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex flex-col">
+                            <span
+                              className={`px-2.5 py-0.5 text-[10px] font-black rounded-lg uppercase tracking-wider w-fit ${
+                                isComplete
+                                  ? "bg-green-500 text-white"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}>
+                              {isComplete ? "Complete" : "In Progress"}
+                            </span>
+                            {isComplete && (
+                              <div className="flex items-center gap-1.5 mt-2 text-green-600">
+                                <CheckCircle size={14} />
+                                <span className="text-[10px] font-bold">
+                                  All Votes Cast
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <h3 className="text-xl font-black text-slate-800 leading-tight uppercase">
+                        <h3 className="text-xl font-black text-slate-800 leading-tight uppercase max-w-[80%]">
                           {org}
                         </h3>
                       </div>
@@ -306,7 +335,7 @@ export default function ElectionBallot() {
                           <span className="text-xs font-bold text-slate-500">
                             {totalSelected} of {totalPositions} Voted
                           </span>
-                          <span className="text-xs font-black text-primary">
+                          <span className="bg-primary/70 px-2.5 py-0.5 rounded-lg text-xs font-black text-white">
                             {Math.round((totalSelected / totalPositions) * 100)}
                             %
                           </span>

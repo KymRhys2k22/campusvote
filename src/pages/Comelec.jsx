@@ -977,12 +977,22 @@ export default function Comelec() {
                   return (
                     <div
                       key={org}
-                      className="space-y-10  bg-slate-50 ring-2 shadow-md ring-slate-200 pt-4 md:px-4 px-0 rounded-3xl pb-12 last:border-0">
-                      <div className="flex items-center gap-4 relative overflow-hidden">
-                        <h2 className="md:text-3xl ml-2 md:ml-0 text-xl  font-black text-slate-800 uppercase tracking-tighter">
+                      className="group relative overflow-hidden space-y-10 bg-slate-50 ring-2 shadow-md ring-slate-200 pt-4 md:px-4 px-0 rounded-3xl pb-12 last:border-0">
+                      {/* Background Logo */}
+                      <div className="absolute top-1/2 -right-12 -translate-y-1/2 w-64 h-64 opacity-50 pointer-events-none rotate-12 blur-[1px]">
+                        <img
+                          src={`/${orgCandidates[0]?.acronym}.webp`}
+                          alt=""
+                          className="w-full h-full object-contain grayscale"
+                        />
+                      </div>
+
+                      <div className="relative z-10 flex items-center gap-4 px-4 md:px-0">
+                        <h2 className="md:text-3xl text-xl font-black text-slate-800 uppercase tracking-tighter">
                           {org}
                         </h2>
-                        <span className="text-center md:px-3 px-2  py-1 bg-primary/10 mr-2 md:mr-0 text-primary text-xs font-black rounded-lg">
+
+                        <span className="text-center md:px-3 px-2 py-1 bg-primary/10 text-primary text-xs font-black rounded-lg">
                           {orgCandidates.length} Candidates
                         </span>
                       </div>
