@@ -109,7 +109,10 @@ export default function Comelec() {
   const [partylists, setPartylists] = useState([]); // Array of all available partylists
   const [isFetchingCandidates, setIsFetchingCandidates] = useState(false); // Loading state for data fetching
   const [selectedOrgs, setSelectedOrgs] = useState([]); // Filter state for selected organizations
-
+  //-- COMELEC USER --
+  const [comelecUser, setComelecUser] = useState(() => {
+    return sessionStorage.getItem("comelec_user");
+  });
   // --- CANDIDATE MANAGEMENT STATE ---
   const [showAddModal, setShowAddModal] = useState(false); // Controls the visibility of the "Add Candidate" modal
   const [isAdding, setIsAdding] = useState(false); // Loading state for candidate insertion
@@ -151,6 +154,19 @@ export default function Comelec() {
     (acc, c) => acc + (c.vote_count || 0),
     0,
   );
+
+  // 2. Sync logic
+  useEffect(() => {
+    // -- Function to sync state with storage --
+    const handleStorageChange = () => {
+      setComelecUser(sessionStorage.getItem("comelec_user"));
+    };
+
+    // Listen for changes (useful if using multiple tabs)
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   /**
    * handleChipScroll
@@ -420,7 +436,9 @@ export default function Comelec() {
     // Parse multi-account configuration from .env
     let comelecAccounts = [];
     try {
-      comelecAccounts = JSON.parse(import.meta.env.VITE_COMELEC_ACCOUNTS || "[]");
+      comelecAccounts = JSON.parse(
+        import.meta.env.VITE_COMELEC_ACCOUNTS || "[]",
+      );
     } catch (err) {
       console.error("Error parsing comelec accounts from env:", err);
     }
@@ -566,8 +584,12 @@ export default function Comelec() {
         className="bg-background-light font-display text-slate-900 min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-y-auto">
         <div className="w-full max-w-md">
           <div className="text-center mb-10 login-header">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-6 shadow-sm border border-primary/5">
-              <GraduationCap size={44} />
+            <div className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-primary/10 text-primary mb-6 shadow-sm border border-primary/5">
+              <img
+                src="https://www.svgrepo.com/show/217141/admin.svg"
+                alt=""
+                className="w-60 h-60"
+              />
             </div>
             <h1 className="text-3xl font-bold tracking-tight mb-2">
               COMELEC Portal
