@@ -1382,7 +1382,7 @@ export default function Comelec() {
 
       {/* 1. Edit Candidate Modal */}
       {showEditModal && editingCandidate && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6">
           <div
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm modal-backdrop"
             onClick={() => !isProcessing && setShowEditModal(false)}
@@ -1652,7 +1652,7 @@ export default function Comelec() {
                 <button
                   type="submit"
                   disabled={isProcessing || uploading}
-                  className="flex-[2] px-6 py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                  className="flex-2 px-6 py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70">
                   {isProcessing ? (
                     <RefreshCw size={18} className="animate-spin" />
                   ) : (
@@ -1669,7 +1669,7 @@ export default function Comelec() {
 
       {/* 2. Delete Confirmation Modal */}
       {showDeleteConfirm && candidateToDelete && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md confirm-backdrop"
             onClick={() => !isProcessing && setShowDeleteConfirm(false)}
