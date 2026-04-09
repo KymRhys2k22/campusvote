@@ -979,11 +979,11 @@ export default function Comelec() {
                       key={org}
                       className="group relative overflow-hidden space-y-10 bg-slate-50 ring-2 shadow-md ring-slate-200 pt-4 md:px-4 px-0 rounded-3xl pb-12 last:border-0">
                       {/* Background Logo */}
-                      <div className="absolute top-1/2 -right-12 -translate-y-1/2 w-64 h-64 opacity-50 pointer-events-none rotate-12 blur-[1px]">
+                      <div className="absolute top-24 right-0 -translate-y-1/2 w-48 h-48 opacity-50 pointer-events-none">
                         <img
                           src={`/${orgCandidates[0]?.acronym}.webp`}
                           alt=""
-                          className="w-full h-full object-contain grayscale"
+                          className="w-full h-full object-contain"
                         />
                       </div>
 

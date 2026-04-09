@@ -145,7 +145,7 @@ function StudentLoginInfo() {
         {/* Left Column: Branding (Visible on Desktop) */}
         <div className="hidden lg:flex flex-col justify-center space-y-8 p-8 animate-in fade-in slide-in-from-left-8 duration-1000">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-2 ring-1 ring-primary/20">
-            <User size={44} />
+            <img src="/student.svg" alt="Logo" className="w-20 h-20" />
           </div>
           <div className="space-y-4">
             <h2 className="text-5xl font-black tracking-tight text-slate-800 leading-none">
@@ -183,11 +183,7 @@ function StudentLoginInfo() {
           {/* Header (Mobile View) */}
           <header ref={headerRef} className="lg:hidden text-center mb-10">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-6 shadow-sm border border-primary/5">
-              <img
-                src="https://www.svgrepo.com/show/520490/student.svg"
-                alt="Logo"
-                className="w-20 h-20"
-              />
+              <img src="/student.svg" alt="Logo" className="w-20 h-20" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight mb-2">
               Student Login
