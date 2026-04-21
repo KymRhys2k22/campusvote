@@ -66,7 +66,7 @@ const organizationTitles = [
 
 const studentOrganizations = [
   {
-    acronym: "SHS CC",
+    acronym: "SHS_CC",
     OrganizationFullName: "Senior High School Coordinating Council",
   },
   {
@@ -74,7 +74,7 @@ const studentOrganizations = [
     OrganizationFullName: "SHS Recreation and Athletics Club",
   },
   { acronym: "JES", OrganizationFullName: "Junior Entrepreneurs Society" },
-  { acronym: "STEM SC", OrganizationFullName: "STEM Student Committee" },
+  { acronym: "STEM_SC", OrganizationFullName: "STEM Student Committee" },
   { acronym: "PARSOC", OrganizationFullName: "Parliamentary Society" },
   {
     acronym: "SAMFIL",
