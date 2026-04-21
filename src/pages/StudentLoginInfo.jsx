@@ -110,7 +110,7 @@ function StudentLoginInfo() {
 
     try {
       const response = await fetch(
-        "https://opensheet.elk.sh/1pbv6_9rWC8ldhlZoUkxyB3KY-6nwaNh0HLFzncsvCBI/students",
+        `https://opensheet.elk.sh/${import.meta.env.VITE_GOOGLE_SHEET}/students`,
       );
       if (!response.ok) throw new Error("Failed to fetch student data");
 
