@@ -10,12 +10,14 @@ import {
 } from "lucide-react";
 
 import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
 import VoterCandidateCard from "../components/VoterCandidateCard";
 import ProgressButtonBar from "../components/ProgressButtonBar";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 export default function ElectionBallot() {
+  const { studentData } = useAuth();
   const [candidates, setCandidates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCandidates, setSelectedCandidates] = useState({}); // { orgName: { position: candidateId } }
@@ -72,9 +74,24 @@ export default function ElectionBallot() {
       if (error) throw error;
       setCandidates(data || []);
 
+      // Filter organizations based on student data
       const uniqueOrgs = [
         ...new Set(data.map((c) => c.organization || "Independent")),
-      ];
+      ].filter((orgName) => {
+        // If no student data, show nothing or all (depending on UX preference)
+        // Here we assume student must have data to see orgs
+        if (!studentData) return false;
+
+        // Find any candidate in this organization to get their acronym
+        const orgCandidate = data.find(
+          (c) => (c.organization || "Independent") === orgName,
+        );
+        const acronym = orgCandidate?.acronym;
+
+        // Only show if the student's record for this acronym is "TRUE"
+        return studentData[acronym] === "TRUE";
+      });
+
       setOrganizations(uniqueOrgs);
       // No longer auto-setting activeOrg to first one, we use the Hub
     } catch (err) {
