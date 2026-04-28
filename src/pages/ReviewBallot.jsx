@@ -175,7 +175,7 @@ export default function ReviewBallot() {
                 <div className="flex items-center gap-3">
                   <div className="h-6 w-1 bg-primary rounded-full" />
                   <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
-                    {org} kupal
+                    {org}
                   </h3>
                 </div>
 
