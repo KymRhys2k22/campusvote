@@ -129,7 +129,7 @@ export default function Comelec() {
   const [newCandidate, setNewCandidate] = useState({
     full_name: "",
     position: "President",
-    quotes: "",
+
     image_url: "",
     organization: "",
     acronym: "",
@@ -581,7 +581,7 @@ export default function Comelec() {
     const candidateData = {
       full_name: newCandidate.full_name,
       position: newCandidate.position,
-      quotes: newCandidate.quotes,
+
       image_url: newCandidate.image_url,
       organization: newCandidate.organization,
       acronym: newCandidate.acronym,
@@ -605,7 +605,6 @@ export default function Comelec() {
       setNewCandidate({
         full_name: "",
         position: "President",
-        quotes: "",
         image_url: "",
         organization: "",
         acronym: "",
@@ -638,7 +637,7 @@ export default function Comelec() {
           acronym: editingCandidate.acronym,
           partylist: editingCandidate.partylist,
           platform: editingCandidate.platform,
-          quotes: editingCandidate.quotes,
+
           image_url: editingCandidate.image_url,
         })
         .eq("id", editingCandidate.id);
@@ -1244,7 +1243,9 @@ export default function Comelec() {
                       size={18}
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"
                     />
-                    <select
+                    <input
+                      type="text"
+                      placeholder="Enter partylist"
                       value={newCandidate.partylist}
                       onChange={(e) =>
                         setNewCandidate((prev) => ({
@@ -1252,18 +1253,8 @@ export default function Comelec() {
                           partylist: e.target.value,
                         }))
                       }
-                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none appearance-none">
-                      <option disabled selected value="">
-                        Select Partylist
-                      </option>
-                      <option value="Independent">Independent</option>
-
-                      {partylists.map((pl) => (
-                        <option key={pl.id} value={pl.name}>
-                          {pl.name}
-                        </option>
-                      ))}
-                    </select>
+                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
+                    />
                   </div>
                 </div>
 
@@ -1292,32 +1283,6 @@ export default function Comelec() {
                   </div>
                 </div>
 
-                {/* Quotes */}
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block px-1">
-                    Quotes
-                  </label>
-                  <div className="relative group">
-                    <Quote
-                      size={18}
-                      className="absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors"
-                    />
-                    <textarea
-                      required
-                      rows={3}
-                      value={newCandidate.quotes}
-                      onChange={(e) =>
-                        setNewCandidate((prev) => ({
-                          ...prev,
-                          quotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Enter candidate's quote or platform summary..."
-                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
-                    />
-                  </div>
-                </div>
-
                 {/* Image Upload Trigger (Hidden Input + Button) */}
                 <div>
                   <input
@@ -1331,8 +1296,8 @@ export default function Comelec() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current.click()}
-                    disabled={uploading}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:text-primary hover:border-primary/50 transition-all font-bold text-sm uppercase tracking-wider">
+                    disabled={uploading || !newCandidate.full_name}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:text-primary hover:border-primary/50 transition-all font-bold text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed">
                     {uploading ? (
                       <RefreshCw size={18} className="animate-spin" />
                     ) : (
@@ -1550,17 +1515,19 @@ export default function Comelec() {
                   </div>
                 </div>
 
-                {/* Partylist */}
+                {/* Partylists */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
-                    Partylist
+                    Partylists
                   </label>
                   <div className="relative">
                     <Briefcase
                       size={18}
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                     />
-                    <select
+                    <input
+                      type="text"
+                      placeholder="Enter partylists"
                       value={editingCandidate.partylist}
                       onChange={(e) =>
                         setEditingCandidate({
@@ -1568,17 +1535,8 @@ export default function Comelec() {
                           partylist: e.target.value,
                         })
                       }
-                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none">
-                      <option disabled value="">
-                        Select Partylist
-                      </option>
-                      <option value="Independent">Independent</option>
-                      {partylists.map((pl) => (
-                        <option key={pl.id} value={pl.name}>
-                          {pl.name}
-                        </option>
-                      ))}
-                    </select>
+                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
+                    />
                   </div>
                 </div>
 
@@ -1599,30 +1557,6 @@ export default function Comelec() {
                         setEditingCandidate({
                           ...editingCandidate,
                           platform: e.target.value,
-                        })
-                      }
-                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Quotes */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
-                    Official Quote
-                  </label>
-                  <div className="relative">
-                    <Quote
-                      size={18}
-                      className="absolute left-4 top-4 text-slate-400"
-                    />
-                    <textarea
-                      rows={3}
-                      value={editingCandidate.quotes}
-                      onChange={(e) =>
-                        setEditingCandidate({
-                          ...editingCandidate,
-                          quotes: e.target.value,
                         })
                       }
                       className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"

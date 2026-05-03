@@ -9,6 +9,7 @@ import {
   Megaphone,
   Edit,
   Trash2,
+  BarChart3,
 } from "lucide-react";
 
 export default function VerticalCandidateCardList({
@@ -195,26 +196,7 @@ export default function VerticalCandidateCardList({
                   </div>
 
                   <div className="space-y-8">
-                    <section>
-                      <div className="flex items-center gap-2 mb-3 text-primary">
-                        <Quote size={18} />
-                        <h4 className="text-xs font-black uppercase tracking-widest">
-                          Motto & Vision
-                        </h4>
-                      </div>
-                      <div className="p-6 bg-primary/5 rounded-4xl border border-primary/10 relative">
-                        <Quote
-                          size={40}
-                          className="absolute -top-4 -left-4 text-primary/10 rotate-180"
-                        />
-                        <p className="text-lg font-bold text-slate-700 italic leading-relaxed pt-2">
-                          "
-                          {candidate.quotes ||
-                            "Always ready to serve for the betterment of the student body."}
-                          "
-                        </p>
-                      </div>
-                    </section>
+
 
                     {candidate.platform && (
                       <section>
