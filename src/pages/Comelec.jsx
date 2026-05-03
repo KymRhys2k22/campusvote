@@ -29,6 +29,7 @@ import {
   Trash2,
   Check,
 } from "lucide-react";
+import imageCompression from "browser-image-compression";
 import { supabase } from "../lib/supabase"; // Our Supabase client for database operations
 import gsap from "gsap";
 import { Flip } from "gsap/all"; // GSAP Flip plugin for smooth layout transitions
@@ -119,6 +120,7 @@ export default function Comelec() {
   const [selectedOrgs, setSelectedOrgs] = useState([]); // Filter state for selected organizations
   const [isElectionOpen, setIsElectionOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [votedCount, setVotedCount] = useState(0);
   //-- COMELEC USER --
   const [comelecUser, setComelecUser] = useState(() => {
     return sessionStorage.getItem("comelec_user");
@@ -255,6 +257,18 @@ export default function Comelec() {
       }
     } catch (err) {
       console.error("Error fetching toggle state:", err);
+    }
+  };
+
+  const fetchVotedCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from("voted")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      setVotedCount(count || 0);
+    } catch (err) {
+      console.error("Error fetching voted count:", err);
     }
   };
 
@@ -443,6 +457,7 @@ export default function Comelec() {
       fetchCandidates();
       fetchPartylists();
       fetchToggleState();
+      fetchVotedCount();
     }
   }, [isLoggedIn]);
 
@@ -546,17 +561,26 @@ export default function Comelec() {
     setUploading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-    // Sanitize the candidate name for use as the Cloudinary Public ID.
-    const sanitizedName = newCandidate.full_name
-      ? newCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
-      : file.name.split(".")[0];
-    formData.append("public_id", `${sanitizedName}`);
-
     try {
+
+      const options = {
+        maxSizeMB: 0.8,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      };
+
+      const compressedFile = await imageCompression(file, options);
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      // Sanitize the candidate name for use as the Cloudinary Public ID.
+      const sanitizedName = newCandidate.full_name
+        ? newCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+        : file.name.split(".")[0];
+      formData.append("public_id", `${sanitizedName}`);
+
       const response = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: "POST",
         body: formData,
@@ -732,16 +756,24 @@ export default function Comelec() {
     setUploading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-    const sanitizedName = editingCandidate.full_name
-      ? editingCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
-      : `update_${Date.now()}`;
-    formData.append("public_id", `${sanitizedName}`);
-
     try {
+      const options = {
+        maxSizeMB: 0.8,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      };
+
+      const compressedFile = await imageCompression(file, options);
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const sanitizedName = editingCandidate.full_name
+        ? editingCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+        : `update_${Date.now()}`;
+      formData.append("public_id", `${sanitizedName}`);
+
       const response = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: "POST",
         body: formData,
@@ -923,7 +955,12 @@ export default function Comelec() {
               <p className="text-sm font-bold text-slate-400 mb-1">
                 Active Voters
               </p>
-              <h3 className="text-2xl font-bold">1,248</h3>
+              <h3 className="text-2xl font-bold flex items-baseline gap-2">
+                {votedCount}
+                <span className="text-sm font-medium text-slate-400">
+                  / 409 ({Math.round((votedCount / 409) * 100)}%)
+                </span>
+              </h3>
             </div>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-sm flex items-center gap-5 stat-card">
@@ -962,7 +999,10 @@ export default function Comelec() {
             </h2>
             <div className="flex items-center rounded-full bg-white p-2 ring-1 ring-primary/10">
               <button
-                onClick={fetchCandidates}
+                onClick={() => {
+                  fetchCandidates();
+                  fetchVotedCount();
+                }}
                 className={` text-slate-400 hover:text-primary transition-colors ${isFetchingCandidates && "animate-spin"}`}
                 title="Refresh Data">
                 <RefreshCw size={20} className="" />

@@ -32,7 +32,10 @@ import {
   RefreshCw,
   Users,
   Search,
+  CheckCircle,
+  ActivityIcon,
 } from "lucide-react";
+import imageCompression from "browser-image-compression";
 import generatePDF from "react-to-pdf";
 import { supabase } from "../lib/supabase";
 import gsap from "gsap";
@@ -525,16 +528,24 @@ export default function Admin() {
     setUploading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-    const sanitizedName = editingCandidate.full_name
-      ? editingCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
-      : `update_${Date.now()}`;
-    formData.append("public_id", `${sanitizedName}`);
-
     try {
+      const options = {
+        maxSizeMB: 0.8,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      };
+
+      const compressedFile = await imageCompression(file, options);
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const sanitizedName = editingCandidate.full_name
+        ? editingCandidate.full_name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+        : `update_${Date.now()}`;
+      formData.append("public_id", `${sanitizedName}`);
+
       const response = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: "POST",
         body: formData,

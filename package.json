@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "@uidotdev/usehooks": "^2.4.1",
     "@vitejs/plugin-react": "^5.0.4",
+    "browser-image-compression": "^2.0.2",
     "gsap": "^3.14.2",
     "lucide-react": "^0.546.0",
     "react": "^19.0.0",

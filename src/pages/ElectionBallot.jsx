@@ -141,6 +141,16 @@ export default function ElectionBallot() {
     }));
   };
 
+  const handleAbstain = (org, position) => {
+    setSelectedCandidates((prev) => ({
+      ...prev,
+      [org]: {
+        ...(prev[org] || {}),
+        [position]: "abstain",
+      },
+    }));
+  };
+
   const currentOrgSelections = selectedCandidates[activeOrg] || {};
   const currentOrgTotalSelected = Object.keys(currentOrgSelections).length;
   const currentOrgTotalPositions = activeOrg
@@ -403,6 +413,15 @@ export default function ElectionBallot() {
                                   ? "Candidate"
                                   : "Candidates"}
                               </span>
+                              <button
+                                onClick={() => handleAbstain(org, position)}
+                                className={`ml-2 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                  currentOrgSelections[position] === "abstain"
+                                    ? "bg-red-500 text-white border-red-500 shadow-md"
+                                    : "bg-white text-slate-500 border-red-500 hover:border-red-500 hover:text-red-500"
+                                }`}>
+                                Abstain
+                              </button>
                             </div>
                             <div className="hidden md:flex items-center gap-2">
                               <button

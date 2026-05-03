@@ -29,7 +29,7 @@ export default function ReviewBallot() {
     // Flatten nested selectedCandidates: { org: { pos: id } } -> [id, id, ...]
     const ids = Object.values(selectedCandidates).flatMap((orgSelections) =>
       Object.values(orgSelections),
-    );
+    ).filter((id) => id !== "abstain");
     if (ids.length === 0) {
       setIsLoading(false);
       return;
@@ -79,7 +79,7 @@ export default function ReviewBallot() {
 
     const selectedIds = Object.values(selectedCandidates).flatMap(
       (orgSelections) => Object.values(orgSelections),
-    );
+    ).filter((id) => id !== "abstain");
 
     try {
       const votePromises = selectedIds.map((id) =>
@@ -111,6 +111,15 @@ export default function ReviewBallot() {
   const getCandidateForPosition = (org, position) => {
     const orgSelections = selectedCandidates[org] || {};
     const candidateId = orgSelections[position];
+    if (candidateId === "abstain") {
+      return {
+        id: `abstain-${org}-${position}`,
+        full_name: "Abstained",
+        partylist: "No Selection",
+        position: position,
+        isAbstain: true,
+      };
+    }
     return candidates.find((c) => c.id === candidateId);
   };
 
@@ -189,17 +198,25 @@ export default function ReviewBallot() {
                         key={position}
                         className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm hover:shadow-md transition-all flex items-center gap-5">
                         <div className="relative">
-                          <img
-                            className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover bg-primary/10 ring-2 ring-primary/5"
-                            src={
-                              candidate.image_url ||
-                              "https://via.placeholder.com/150"
-                            }
-                            alt={candidate.full_name}
-                          />
-                          <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full shadow-lg">
-                            <CheckCircle size={14} />
-                          </div>
+                          {candidate.isAbstain ? (
+                            <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200">
+                              <Ban size={32} className="text-slate-400" />
+                            </div>
+                          ) : (
+                            <>
+                              <img
+                                className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover bg-primary/10 ring-2 ring-primary/5"
+                                src={
+                                  candidate.image_url ||
+                                  "https://via.placeholder.com/150"
+                                }
+                                alt={candidate.full_name}
+                              />
+                              <div className="absolute -top-2 -right-2 bg-primary text-white p-1 rounded-full shadow-lg">
+                                <CheckCircle size={14} />
+                              </div>
+                            </>
+                          )}
                         </div>
                         <div className="flex-1">
                           <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest mb-1">
@@ -307,25 +324,37 @@ export default function ReviewBallot() {
                 Your Official Selections
               </p>
               <div className="space-y-3">
-                {candidates.map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                    <img
-                      src={c.image_url || "https://via.placeholder.com/150"}
-                      alt={c.full_name}
-                      className="w-12 h-12 rounded-lg object-cover ring-1 ring-slate-100"
-                    />
-                    <div>
-                      <p className="text-[10px] font-bold text-primary uppercase">
-                        {c.position}
-                      </p>
-                      <p className="text-sm font-bold text-slate-800">
-                        {c.full_name}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                {organizations.flatMap((org) =>
+                  POSITIONS.map((position) => {
+                    const c = getCandidateForPosition(org, position);
+                    if (!c) return null;
+                    return (
+                      <div
+                        key={c.id}
+                        className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                        {c.isAbstain ? (
+                          <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
+                            <Ban size={20} className="text-slate-400" />
+                          </div>
+                        ) : (
+                          <img
+                            src={c.image_url || "https://via.placeholder.com/150"}
+                            alt={c.full_name}
+                            className="w-12 h-12 rounded-lg object-cover ring-1 ring-slate-100"
+                          />
+                        )}
+                        <div>
+                          <p className="text-[10px] font-bold text-primary uppercase">
+                            {c.position}
+                          </p>
+                          <p className="text-sm font-bold text-slate-800">
+                            {c.full_name}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }),
+                )}
               </div>
             </div>
           </div>
