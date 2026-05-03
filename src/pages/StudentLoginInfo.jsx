@@ -11,6 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import Divider from "../components/Divider";
 import ProgressButtonBar from "../components/ProgressButtonBar";
 import gsap from "gsap";
+import { supabase } from "../lib/supabase";
 
 function StudentLoginInfo() {
   const { login } = useAuth();
@@ -19,6 +20,8 @@ function StudentLoginInfo() {
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isElectionOpen, setIsElectionOpen] = useState(true);
+  const [fetchingToggle, setFetchingToggle] = useState(true);
   const progressButtonBarRef = useRef(null);
   const containerRef = useRef(null);
   const headerRef = useRef(null);
@@ -27,7 +30,11 @@ function StudentLoginInfo() {
   const buttonRef = useRef(null);
 
   useLayoutEffect(() => {
+    if (fetchingToggle || !isElectionOpen) return;
+
     const ctx = gsap.context(() => {
+      if (!headerRef.current || !formRef.current || !buttonRef.current) return;
+      
       // Header Animation
       gsap.from(headerRef.current, {
         y: -100,
@@ -38,14 +45,16 @@ function StudentLoginInfo() {
 
       // Form Elements Animation
       const formElements = formRef.current.querySelectorAll(".animate-field");
-      gsap.from(formElements, {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-        delay: 0.3,
-      });
+      if (formElements.length > 0) {
+        gsap.from(formElements, {
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out",
+          delay: 0.3,
+        });
+      }
 
       // Button Animation
       gsap.fromTo(
@@ -66,6 +75,25 @@ function StudentLoginInfo() {
     }, containerRef);
 
     return () => ctx.revert();
+  }, [fetchingToggle, isElectionOpen]);
+
+  useEffect(() => {
+    const fetchToggleStatus = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("toggle")
+          .select("open")
+          .eq("id", 1)
+          .single();
+        if (error) throw error;
+        setIsElectionOpen(data.open);
+      } catch (err) {
+        console.error("Failed to fetch election status:", err);
+      } finally {
+        setFetchingToggle(false);
+      }
+    };
+    fetchToggleStatus();
   }, []);
 
   useLayoutEffect(() => {
@@ -141,7 +169,24 @@ function StudentLoginInfo() {
     <div
       ref={containerRef}
       className="font-display text-slate-900 min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden p-6 md:p-12 transition-all duration-500">
+      {fetchingToggle ? (
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 size={48} className="animate-spin text-primary" />
+        </div>
+      ) : !isElectionOpen ? (
+        <div className="text-center p-8 bg-white/60 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 shadow-2xl animate-in fade-in zoom-in-95 duration-500 max-w-lg">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-500/10 text-red-500 mb-6 border border-red-500/20">
+            <AlertCircle size={48} />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-800 mb-4">
+            Election is <span className="text-red-500">Closed</span>
+          </h1>
+          <p className="text-slate-500 font-medium">
+            The voting period has ended or is currently paused. Please wait for further announcements from the election committee.
+          </p>
+        </div>
+      ) : (
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden p-6 md:p-12 transition-all duration-500">
         {/* Left Column: Branding (Visible on Desktop) */}
         <div className="hidden lg:flex flex-col justify-center space-y-8 p-8 animate-in fade-in slide-in-from-left-8 duration-1000">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 text-primary mb-2 ring-1 ring-primary/20">
@@ -299,15 +344,18 @@ function StudentLoginInfo() {
           </main>
         </div>
       </div>
+      )}
 
-      <ProgressButtonBar
-        navigateTo={studentData ? `/ballot/${studentData.student_number}` : ""}
-        current={studentData ? 1 : 0}
-        total={3}
-        ref={progressButtonBarRef}
-        text={"Start Voting Session"}
-        disabled={!studentData}
-      />
+      {isElectionOpen && !fetchingToggle && (
+        <ProgressButtonBar
+          navigateTo={studentData ? `/ballot/${studentData.student_number}` : ""}
+          current={studentData ? 1 : 0}
+          total={3}
+          ref={progressButtonBarRef}
+          text={"Start Voting Session"}
+          disabled={!studentData}
+        />
+      )}
     </div>
   );
 }

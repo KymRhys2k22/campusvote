@@ -117,6 +117,8 @@ export default function Comelec() {
   const [partylists, setPartylists] = useState([]); // Array of all available partylists
   const [isFetchingCandidates, setIsFetchingCandidates] = useState(false); // Loading state for data fetching
   const [selectedOrgs, setSelectedOrgs] = useState([]); // Filter state for selected organizations
+  const [isElectionOpen, setIsElectionOpen] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
   //-- COMELEC USER --
   const [comelecUser, setComelecUser] = useState(() => {
     return sessionStorage.getItem("comelec_user");
@@ -236,6 +238,23 @@ export default function Comelec() {
       setPartylists(data || []);
     } catch (err) {
       console.error("Error fetching partylists:", err);
+    }
+  };
+
+  const fetchToggleState = async () => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("toggle")
+        .select("open")
+        .eq("id", 1)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (data) {
+        setIsElectionOpen(data.open);
+      }
+    } catch (err) {
+      console.error("Error fetching toggle state:", err);
     }
   };
 
@@ -423,6 +442,7 @@ export default function Comelec() {
     if (isLoggedIn) {
       fetchCandidates();
       fetchPartylists();
+      fetchToggleState();
     }
   }, [isLoggedIn]);
 
@@ -567,6 +587,34 @@ export default function Comelec() {
     setIsLoggedIn(false);
     sessionStorage.removeItem("comelec_session");
     setCandidates([]);
+  };
+
+  const handleToggleElection = async () => {
+    setIsToggling(true);
+    try {
+      const newValue = !isElectionOpen;
+      const { data, error } = await supabase
+        .from("toggle")
+        .update({ open: newValue })
+        .eq("id", 1)
+        .select();
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setIsElectionOpen(newValue);
+      } else {
+        alert(
+          "Failed to update! Please ensure Row Level Security (RLS) is disabled for the 'toggle' table in your Supabase dashboard.",
+        );
+        throw new Error("Update affected 0 rows (Likely blocked by RLS).");
+      }
+    } catch (err) {
+      console.error("Error toggling election state:", err);
+      setError("Failed to toggle election state.");
+    } finally {
+      setIsToggling(false);
+    }
   };
 
   /**
@@ -835,12 +883,31 @@ export default function Comelec() {
             </p>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
-          title="Logout">
-          <LogOut size={22} />
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleToggleElection}
+            disabled={isToggling}
+            className={`px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center gap-2 ${
+              isElectionOpen
+                ? "bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white"
+                : "bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white"
+            } disabled:opacity-50`}>
+            {isToggling ? (
+              <RefreshCw size={16} className="animate-spin" />
+            ) : isElectionOpen ? (
+              <Eye size={16} />
+            ) : (
+              <EyeOff size={16} />
+            )}
+            {isElectionOpen ? "Open Election" : "Close Election"}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+            title="Logout">
+            <LogOut size={22} />
+          </button>
+        </div>
       </header>
 
       <main className="grow p-6 max-w-6xl mx-auto w-full">
