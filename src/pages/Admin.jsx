@@ -30,6 +30,8 @@ import {
   Check,
   Plus,
   RefreshCw,
+  Users,
+  Search,
 } from "lucide-react";
 import generatePDF from "react-to-pdf";
 import { supabase } from "../lib/supabase";
@@ -44,6 +46,12 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState(null);
   const [isElectionOpen, setIsElectionOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  // --- VOTERS MODAL STATE ---
+  const [showVotersModal, setShowVotersModal] = useState(false);
+  const [votersList, setVotersList] = useState([]);
+  const [votersSearch, setVotersSearch] = useState("");
+  const [isFetchingVoters, setIsFetchingVoters] = useState(false);
 
   // --- AUTHENTICATION STATE ---
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -440,6 +448,71 @@ export default function Admin() {
       setError("Failed to toggle election state.");
     } finally {
       setIsToggling(false);
+    }
+  };
+
+  // --- VOTERS MANAGEMENT LOGIC ---
+  const fetchVotersList = async () => {
+    setIsFetchingVoters(true);
+    try {
+      // 1. Fetch Google Sheet students
+      const sheetUrl = `https://opensheet.elk.sh/${import.meta.env.VITE_GOOGLE_SHEET}/students`;
+      const sheetRes = await fetch(sheetUrl);
+      let sheetStudents = [];
+      if (sheetRes.ok) {
+        sheetStudents = await sheetRes.json();
+      }
+
+      // 2. Fetch Supabase voted table
+      const { data: votedData, error } = await supabase
+        .from("voted")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // 3. Merge data
+      const mergedList = (votedData || []).map((vote) => {
+        const sheetStudent = sheetStudents.find(
+          (s) => s.student_number === vote.student_number
+        );
+        return {
+          ...vote,
+          name: sheetStudent ? sheetStudent.name : "Unknown Name",
+          section: sheetStudent ? sheetStudent.section : "Unknown Section",
+        };
+      });
+
+      setVotersList(mergedList);
+    } catch (err) {
+      console.error("Error fetching voters:", err);
+      alert("Failed to load voters list.");
+    } finally {
+      setIsFetchingVoters(false);
+    }
+  };
+
+  const openVotersModal = () => {
+    setShowVotersModal(true);
+    fetchVotersList();
+  };
+
+  const handleDeleteVote = async (studentNumber) => {
+    if (!window.confirm(`Are you sure you want to allow student ${studentNumber} to vote again?`)) return;
+    
+    try {
+      const { error } = await supabase
+        .from("voted")
+        .delete()
+        .eq("student_number", studentNumber);
+        
+      if (error) throw error;
+      
+      // Remove from list
+      setVotersList((prev) => prev.filter((v) => v.student_number !== studentNumber));
+    } catch (err) {
+      console.error("Error deleting vote:", err);
+      alert("Failed to delete vote record.");
     }
   };
 
@@ -1919,6 +1992,114 @@ export default function Admin() {
                 className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all">
                 Keep Candidate
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Voters Modal FAB */}
+      {isLoggedIn && (
+        <button
+          onClick={openVotersModal}
+          className="fixed bottom-6 right-6 z-[90] bg-primary text-white p-4 rounded-full shadow-2xl hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all flex items-center justify-center group"
+          title="Manage Voters">
+          <Users size={28} />
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out font-black text-sm pl-0 group-hover:pl-3 uppercase tracking-widest">
+            Voters
+          </span>
+        </button>
+      )}
+
+      {/* 4. Voters Management Modal */}
+      {showVotersModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            onClick={() => setShowVotersModal(false)}
+          />
+          <div className="relative w-full max-w-2xl max-h-[85vh] bg-white rounded-[2.5rem] shadow-2xl border border-primary/10 overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+            {/* Header */}
+            <div className="bg-slate-50 px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                    Voter <span className="text-primary">Management</span>
+                  </h3>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mt-1">
+                    {votersList.length} total voters recorded
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowVotersModal(false)}
+                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="p-6 shrink-0 border-b border-slate-100 bg-white">
+              <div className="relative group">
+                <Search
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Search by full name or student number..."
+                  value={votersSearch}
+                  onChange={(e) => setVotersSearch(e.target.value)}
+                  className="w-full bg-slate-50 rounded-xl py-3 pl-12 pr-4 text-sm font-medium border-none shadow-inner ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+              {isFetchingVoters ? (
+                <div className="flex flex-col items-center justify-center py-12 text-primary">
+                  <Loader2 size={32} className="animate-spin mb-4" />
+                  <p className="text-xs font-bold uppercase tracking-widest">Loading Voters...</p>
+                </div>
+              ) : votersList.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <Users size={48} className="mx-auto mb-4 opacity-20" />
+                  <p className="font-bold">No voters found.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {votersList
+                    .filter((v) =>
+                      (v.name + " " + v.student_number)
+                        .toLowerCase()
+                        .includes(votersSearch.toLowerCase())
+                    )
+                    .map((voter) => (
+                      <div
+                        key={voter.id}
+                        className="bg-white border border-slate-100 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all group">
+                        <div>
+                          <p className="font-bold text-slate-800 text-sm md:text-base">
+                            {voter.name}
+                          </p>
+                          <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">
+                            {voter.student_number} • {voter.section}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteVote(voter.student_number)}
+                          className="p-2.5 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 flex items-center gap-2"
+                          title="Revoke Vote">
+                          <Trash2 size={18} />
+                          <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">Revoke</span>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

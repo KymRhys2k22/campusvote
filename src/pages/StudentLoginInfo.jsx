@@ -150,6 +150,43 @@ function StudentLoginInfo() {
       );
 
       if (student) {
+        // Check if student has already voted
+        const { data: existingVote, error: checkError } = await supabase
+          .from("voted")
+          .select("id")
+          .eq("student_number", student.student_number)
+          .maybeSingle();
+
+        if (checkError) {
+          console.error("Error checking vote status:", checkError);
+          setError("Failed to verify voting status. Please try again.");
+          setLoading(false);
+          return;
+        }
+
+        if (existingVote) {
+          setError("You have already voted.");
+          setLoading(false);
+          return;
+        }
+
+        // Insert into voted table as requested
+        const { error: insertError } = await supabase
+          .from("voted")
+          .insert({
+            student_number: student.student_number,
+            email_address: student.email_address,
+          });
+
+        if (insertError) {
+          console.error("Error inserting to voted table:", insertError);
+          if (insertError.code === "23505") { // unique constraint violation
+            setError("You have already voted.");
+            setLoading(false);
+            return;
+          }
+        }
+
         setStudentData(student);
         login(student);
       } else {
