@@ -477,7 +477,7 @@ export default function Admin() {
       // 3. Merge data
       const mergedList = (votedData || []).map((vote) => {
         const sheetStudent = sheetStudents.find(
-          (s) => s.student_number === vote.student_number
+          (s) => s.student_number === vote.student_number,
         );
         return {
           ...vote,
@@ -501,18 +501,25 @@ export default function Admin() {
   };
 
   const handleDeleteVote = async (studentNumber) => {
-    if (!window.confirm(`Are you sure you want to allow student ${studentNumber} to vote again?`)) return;
-    
+    if (
+      !window.confirm(
+        `Are you sure you want to allow student ${studentNumber} to vote again?`,
+      )
+    )
+      return;
+
     try {
       const { error } = await supabase
         .from("voted")
         .delete()
         .eq("student_number", studentNumber);
-        
+
       if (error) throw error;
-      
+
       // Remove from list
-      setVotersList((prev) => prev.filter((v) => v.student_number !== studentNumber));
+      setVotersList((prev) =>
+        prev.filter((v) => v.student_number !== studentNumber),
+      );
     } catch (err) {
       console.error("Error deleting vote:", err);
       alert("Failed to delete vote record.");
@@ -762,7 +769,7 @@ export default function Admin() {
             <button
               onClick={handleToggleElection}
               disabled={isToggling}
-              className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-sm ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-sm ${
                 isElectionOpen
                   ? "bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white border border-green-500/20"
                   : "bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white border border-red-500/20"
@@ -774,7 +781,9 @@ export default function Admin() {
               ) : (
                 <EyeOff size={16} />
               )}
-              {isElectionOpen ? "Open Election" : "Close Election"}
+              <span className="md:block hidden">
+                {isElectionOpen ? "Open Election" : "Close Election"}
+              </span>
             </button>
             <button
               onClick={downloadPDF}
@@ -2073,7 +2082,9 @@ export default function Admin() {
               {isFetchingVoters ? (
                 <div className="flex flex-col items-center justify-center py-12 text-primary">
                   <Loader2 size={32} className="animate-spin mb-4" />
-                  <p className="text-xs font-bold uppercase tracking-widest">Loading Voters...</p>
+                  <p className="text-xs font-bold uppercase tracking-widest">
+                    Loading Voters...
+                  </p>
                 </div>
               ) : votersList.length === 0 ? (
                 <div className="text-center py-12 text-slate-400">
@@ -2086,7 +2097,7 @@ export default function Admin() {
                     .filter((v) =>
                       (v.name + " " + v.student_number)
                         .toLowerCase()
-                        .includes(votersSearch.toLowerCase())
+                        .includes(votersSearch.toLowerCase()),
                     )
                     .map((voter) => (
                       <div
@@ -2105,7 +2116,9 @@ export default function Admin() {
                           className="p-2.5 text-red-400 hover:text-white hover:bg-red-500 rounded-xl transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 flex items-center gap-2"
                           title="Revoke Vote">
                           <Trash2 size={18} />
-                          <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">Revoke</span>
+                          <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">
+                            Revoke
+                          </span>
                         </button>
                       </div>
                     ))}
