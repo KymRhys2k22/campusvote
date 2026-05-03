@@ -30,17 +30,26 @@ function StudentLoginInfo() {
   const buttonRef = useRef(null);
 
   const organizationLogo = [
-    "SHS_CC",
-    "SHS_RAC",
-    "JES",
-    "STEM_SC",
-    "PARSOC",
-    "SAMFIL",
-    "3T",
-    "ARTAMS",
-    "YFC",
-    "ENC",
-    "TGH",
+    {
+      acronym: "SHS_CC",
+      OrganizationFullName: "Senior High School Coordinating Council",
+    },
+    {
+      acronym: "SHS_RAC",
+      OrganizationFullName: "SHS Recreation and Athletics Club",
+    },
+    { acronym: "JES", OrganizationFullName: "Junior Entrepreneurs Society" },
+    { acronym: "STEM_SC", OrganizationFullName: "STEM Student Committee" },
+    { acronym: "PARSOC", OrganizationFullName: "Parliamentary Society" },
+    {
+      acronym: "SAMFIL",
+      OrganizationFullName: "Samahan ng mga Mag-aaral sa Filipino",
+    },
+    { acronym: "3T", OrganizationFullName: "Tamaraw Tech Troop" },
+    { acronym: "ARTAMS", OrganizationFullName: "Artistic Tamaraws" },
+    { acronym: "YFC", OrganizationFullName: "Youth for Christ" },
+    { acronym: "ENC", OrganizationFullName: "Every Nation Campus" },
+    { acronym: "TGH", OrganizationFullName: "The Green Herald" },
   ];
 
   useLayoutEffect(() => {
@@ -219,21 +228,32 @@ function StudentLoginInfo() {
     <div
       ref={containerRef}
       className="font-display text-slate-900 min-h-screen flex flex-col items-center justify-center p-4">
+      {!isElectionOpen && (
+        <div className="w-full relative overflow-hidden mb-12 py-4">
+          <div className="absolute inset-y-0 left-0 w-20 z-10 bg-linear-to-r from-background-light to-transparent"></div>
+          <div className="absolute inset-y-0 right-0 w-20 z-10 bg-linear-to-l from-background-light to-transparent"></div>
+          <div className="flex animate-marquee gap-12 items-center">
+            {[...organizationLogo, ...organizationLogo].map((logo, index) => (
+              <div key={index} className="relative group">
+                <img
+                  src={`/${logo.acronym}.webp`}
+                  alt="Logo"
+                  className="group-hover:scale-110 transition-all duration-300 ease-in-out group-hover:z-30 border-border w-24 h-24 md:w-36 md:h-36 object-contain shrink-0  group-hover:grayscale-0 cursor-pointer"
+                />
+                <p className="hidden group-hover:absolute group-hover:top-5 group-hover:right-3 group-hover:left-0 group-hover:bottom-2 group-hover:flex group-hover:items-center group-hover:justify-center group-hover:bg-black/60 group-hover:text-white transition-all duration-300 ease-in-out text-center mt-2">
+                  {logo.OrganizationFullName}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {fetchingToggle ? (
         <div className="flex items-center justify-center min-h-[50vh]">
           <Loader2 size={48} className="animate-spin text-primary" />
         </div>
       ) : !isElectionOpen ? (
         <div className="text-center p-8 bg-white/60 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 shadow-2xl animate-in fade-in zoom-in-95 duration-500 max-w-lg">
-          <div className="flex justify-center gap-2 w-full mb-6">
-            {organizationLogo.map((logo) => (
-              <img
-                src={`/${logo}.webp`}
-                alt="Logo"
-                className="w-5 h-5 md:w-10 md:h-10"
-              />
-            ))}
-          </div>
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-500/10 text-red-500 mb-6 border border-red-500/20">
             <AlertCircle size={48} />
           </div>
