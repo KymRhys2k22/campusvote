@@ -10,6 +10,7 @@ import {
   Edit,
   Trash2,
   BarChart3,
+  ChevronDown,
 } from "lucide-react";
 
 export default function VerticalCandidateCardList({
@@ -18,6 +19,13 @@ export default function VerticalCandidateCardList({
   onDelete,
 }) {
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [expandedPlatforms, setExpandedPlatforms] = useState([]);
+
+  const togglePlatform = (index) => {
+    setExpandedPlatforms((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
+    );
+  };
   const hasImage = !!candidate.image_url;
 
   return (
@@ -59,8 +67,12 @@ export default function VerticalCandidateCardList({
             </span>
           </p>
 
-          <p className="text-sm text-slate-500 italic max-w-xl truncate">
-            "{candidate.quotes || "Leadership through action."}"
+          <p className="text-sm font-black text-black/80 tracking-[0.25em] mb-8">
+            <span className="line-clamp-3 wrap-break-word text-ellipsis">
+              {candidate.platform?.[0]?.length > 20
+                ? `${candidate.platform[0].substring(0, 30)}...`
+                : candidate.platform?.[0]}
+            </span>
           </p>
         </div>
 
@@ -114,14 +126,14 @@ export default function VerticalCandidateCardList({
               className="absolute inset-0"
               onClick={() => setShowDetailModal(false)}
             />
-            <div className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
+            <div className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
               {/* Header / Hero */}
               <div className="relative h-64 shrink-0">
                 {hasImage ? (
                   <img
                     src={candidate.image_url}
                     alt={candidate.full_name}
-                    className="w-full h-full object-cover object-center md:object-top"
+                    className="w-full h-full object-cover object-top"
                   />
                 ) : (
                   <div className="w-full h-full bg-linear-to-br from-primary/30 to-primary/5 flex items-center justify-center">
@@ -196,34 +208,40 @@ export default function VerticalCandidateCardList({
                   </div>
 
                   <div className="space-y-8">
-
-
-                    {candidate.platform && (
-                      <section>
-                        <div className="flex items-center gap-2 mb-3 text-primary">
-                          <Megaphone size={18} />
-                          <h4 className="text-xs font-black uppercase tracking-widest">
-                            Platforms
-                          </h4>
+                    {candidate.platform?.map((platform, index) => {
+                      const isExpanded = expandedPlatforms.includes(index);
+                      return (
+                        <div
+                          key={index}
+                          className="border-b border-slate-100 last:border-none pb-4 last:pb-0">
+                          <button
+                            onClick={() => togglePlatform(index)}
+                            className="w-full flex mt-6 justify-between items-center gap-2 mb-3 text-primary hover:opacity-80 transition-opacity">
+                            <div className="flex items-center gap-2">
+                              <Megaphone size={18} />
+                              <h4 className="text-xs font-black uppercase tracking-widest">
+                                Platform {index + 1}
+                              </h4>
+                            </div>
+                            <ChevronDown
+                              size={18}
+                              className={`transition-transform duration-300 ${
+                                isExpanded ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                          {isExpanded && (
+                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                              <p className="text-sm text-slate-600 leading-relaxed font-medium whitespace-pre-line">
+                                {platform}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                        <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                          <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                            {candidate.platform}
-                          </p>
-                        </div>
-                      </section>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
-
-              {/* Footer Action */}
-              <div className="p-8 border-t border-slate-100 shrink-0">
-                <button
-                  onClick={() => setShowDetailModal(false)}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-black py-4 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-widest text-sm active:scale-[0.98]">
-                  Close Details
-                </button>
               </div>
             </div>
           </div>,

@@ -138,7 +138,7 @@ export default function Comelec() {
     organization: "",
     acronym: "",
     partylist: "",
-    platform: "",
+    platform: [""],
   });
 
   // --- MANAGEMENT STATE ---
@@ -562,7 +562,6 @@ export default function Comelec() {
     setError("");
 
     try {
-
       const options = {
         maxSizeMB: 0.8,
         maxWidthOrHeight: 1200,
@@ -600,6 +599,50 @@ export default function Comelec() {
       setError("Failed to upload image. Please try again.");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handlePlatformChange = (type, index, value) => {
+    if (type === "new") {
+      setNewCandidate((prev) => {
+        const newPlatform = [...prev.platform];
+        newPlatform[index] = value;
+        return { ...prev, platform: newPlatform };
+      });
+    } else {
+      setEditingCandidate((prev) => {
+        const newPlatform = [...(prev.platform || [""])];
+        newPlatform[index] = value;
+        return { ...prev, platform: newPlatform };
+      });
+    }
+  };
+
+  const handleAddPlatform = (type) => {
+    if (type === "new") {
+      setNewCandidate((prev) => ({
+        ...prev,
+        platform: [...prev.platform, ""],
+      }));
+    } else {
+      setEditingCandidate((prev) => ({
+        ...prev,
+        platform: [...(prev.platform || [""]), ""],
+      }));
+    }
+  };
+
+  const handleRemovePlatform = (type, index) => {
+    if (type === "new") {
+      setNewCandidate((prev) => ({
+        ...prev,
+        platform: prev.platform.filter((_, i) => i !== index),
+      }));
+    } else {
+      setEditingCandidate((prev) => ({
+        ...prev,
+        platform: (prev.platform || [""]).filter((_, i) => i !== index),
+      }));
     }
   };
 
@@ -681,7 +724,7 @@ export default function Comelec() {
         organization: "",
         acronym: "",
         partylist: "",
-        platform: "",
+        platform: [""],
       });
       fetchCandidates(); // Refresh list to show the new candidate
     } catch (err) {
@@ -1366,27 +1409,45 @@ export default function Comelec() {
                 </div>
 
                 {/* Platform */}
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block px-1">
-                    Platform of Government
-                  </label>
-                  <div className="relative group">
-                    <Megaphone
-                      size={18}
-                      className="absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors"
-                    />
-                    <textarea
-                      rows={3}
-                      value={newCandidate.platform}
-                      onChange={(e) =>
-                        setNewCandidate((prev) => ({
-                          ...prev,
-                          platform: e.target.value,
-                        }))
-                      }
-                      placeholder="Outline core platforms and goals..."
-                      className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
-                    />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <label className="text-xs font-bold uppercase tracking-widest text-primary">
+                      Platform of Government
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleAddPlatform("new")}
+                      className="cursor-pointer p-1.5 flex flex-row items-center gap-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all">
+                      <span className="hidden text-xs md:block">Add</span>
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(newCandidate.platform || [""]).map((p, idx) => (
+                      <div key={idx} className="relative group/platform">
+                        <Megaphone
+                          size={18}
+                          className="absolute left-4 top-4 text-slate-400 group-focus-within/platform:text-primary transition-colors"
+                        />
+                        <textarea
+                          rows={2}
+                          value={p}
+                          onChange={(e) =>
+                            handlePlatformChange("new", idx, e.target.value)
+                          }
+                          placeholder={`Platform entry #${idx + 1}...`}
+                          className="w-full bg-slate-50 border-none rounded-xl py-3.5 pl-12 pr-12 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary transition-all outline-none resize-none"
+                        />
+                        {newCandidate.platform.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePlatform("new", idx)}
+                            className="absolute right-3 top-3 p-2 text-slate-300 hover:text-red-500 transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -1648,26 +1709,44 @@ export default function Comelec() {
                 </div>
 
                 {/* Platform */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
-                    Platform Summary
-                  </label>
-                  <div className="relative">
-                    <Megaphone
-                      size={18}
-                      className="absolute left-4 top-4 text-slate-400"
-                    />
-                    <textarea
-                      rows={3}
-                      value={editingCandidate.platform}
-                      onChange={(e) =>
-                        setEditingCandidate({
-                          ...editingCandidate,
-                          platform: e.target.value,
-                        })
-                      }
-                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
-                    />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary">
+                      Platform Summary
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleAddPlatform("edit")}
+                      className="p-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all">
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(editingCandidate.platform || [""]).map((p, idx) => (
+                      <div key={idx} className="relative group/platform">
+                        <Megaphone
+                          size={18}
+                          className="absolute left-4 top-4 text-slate-400 group-focus-within/platform:text-primary transition-colors"
+                        />
+                        <textarea
+                          rows={2}
+                          value={p}
+                          onChange={(e) =>
+                            handlePlatformChange("edit", idx, e.target.value)
+                          }
+                          placeholder={`Platform entry #${idx + 1}...`}
+                          className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-12 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                        />
+                        {(editingCandidate.platform || [""]).length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePlatform("edit", idx)}
+                            className="absolute right-3 top-4 p-2 text-slate-300 hover:text-red-500 transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

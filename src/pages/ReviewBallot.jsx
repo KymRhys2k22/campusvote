@@ -27,9 +27,9 @@ export default function ReviewBallot() {
 
   const fetchSelectedDetails = async () => {
     // Flatten nested selectedCandidates: { org: { pos: id } } -> [id, id, ...]
-    const ids = Object.values(selectedCandidates).flatMap((orgSelections) =>
-      Object.values(orgSelections),
-    ).filter((id) => id !== "abstain");
+    const ids = Object.values(selectedCandidates)
+      .flatMap((orgSelections) => Object.values(orgSelections))
+      .filter((id) => id !== "abstain");
     if (ids.length === 0) {
       setIsLoading(false);
       return;
@@ -77,9 +77,9 @@ export default function ReviewBallot() {
     setIsSubmitting(true);
     setError(null);
 
-    const selectedIds = Object.values(selectedCandidates).flatMap(
-      (orgSelections) => Object.values(orgSelections),
-    ).filter((id) => id !== "abstain");
+    const selectedIds = Object.values(selectedCandidates)
+      .flatMap((orgSelections) => Object.values(orgSelections))
+      .filter((id) => id !== "abstain");
 
     try {
       const votePromises = selectedIds.map((id) =>
@@ -127,10 +127,27 @@ export default function ReviewBallot() {
     "President",
     "Vice President",
     "Secretary",
+    "Assistant Secretary",
     "Treasurer",
+    "Chairman",
+    "Chairwoman",
+    "Vice Chairman",
+    "Vice Chairwoman",
+    "Editor-in-Chief",
+    "Associate Editor",
+    "Managing Editor",
+    "President for Internal",
+    "Vice President for Internal",
+    "Vice President for External",
+    "Public Relations Officer",
     "Auditor",
-    "PRO",
-    "Representative",
+    "Protocol Officer",
+    "Public Information Officer",
+    "Grade 12 Representative",
+    "Pangulo",
+    "Pangalawang Pangulo",
+    "Kalihim",
+    "Kawani ng Ugnayang Pampubliko",
   ];
 
   const organizations = Object.keys(selectedCandidates);
@@ -338,7 +355,9 @@ export default function ReviewBallot() {
                           </div>
                         ) : (
                           <img
-                            src={c.image_url || "https://via.placeholder.com/150"}
+                            src={
+                              c.image_url || "https://via.placeholder.com/150"
+                            }
                             alt={c.full_name}
                             className="w-12 h-12 rounded-lg object-cover ring-1 ring-slate-100"
                           />

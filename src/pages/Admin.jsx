@@ -570,6 +570,28 @@ export default function Admin() {
     }
   };
 
+  const handlePlatformChange = (index, value) => {
+    setEditingCandidate((prev) => {
+      const newPlatform = [...(prev.platform || [""])];
+      newPlatform[index] = value;
+      return { ...prev, platform: newPlatform };
+    });
+  };
+
+  const handleAddPlatform = () => {
+    setEditingCandidate((prev) => ({
+      ...prev,
+      platform: [...(prev.platform || [""]), ""],
+    }));
+  };
+
+  const handleRemovePlatform = (index) => {
+    setEditingCandidate((prev) => ({
+      ...prev,
+      platform: (prev.platform || [""]).filter((_, i) => i !== index),
+    }));
+  };
+
   const handleUpdateCandidate = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
@@ -1889,50 +1911,45 @@ export default function Admin() {
                 </div>
 
                 {/* Platform */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
-                    Platform Summary
-                  </label>
-                  <div className="relative">
-                    <Megaphone
-                      size={18}
-                      className="absolute left-4 top-4 text-slate-400"
-                    />
-                    <textarea
-                      rows={3}
-                      value={editingCandidate.platform}
-                      onChange={(e) =>
-                        setEditingCandidate({
-                          ...editingCandidate,
-                          platform: e.target.value,
-                        })
-                      }
-                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
-                    />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-primary">
+                      Platform Summary
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleAddPlatform}
+                      className="cursor-pointer p-1.5 flex flex-row items-center gap-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all">
+                      <span className="hidden text-xs md:block">Add</span>
+                      <Plus size={16} />
+                    </button>
                   </div>
-                </div>
-
-                {/* Quotes */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">
-                    Official Quote
-                  </label>
-                  <div className="relative">
-                    <Quote
-                      size={18}
-                      className="absolute left-4 top-4 text-slate-400"
-                    />
-                    <textarea
-                      rows={3}
-                      value={editingCandidate.quotes}
-                      onChange={(e) =>
-                        setEditingCandidate({
-                          ...editingCandidate,
-                          quotes: e.target.value,
-                        })
-                      }
-                      className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
-                    />
+                  <div className="space-y-3">
+                    {(editingCandidate.platform || [""]).map((p, idx) => (
+                      <div key={idx} className="relative group/platform">
+                        <Megaphone
+                          size={18}
+                          className="absolute left-4 top-4 text-slate-400 group-focus-within/platform:text-primary transition-colors"
+                        />
+                        <textarea
+                          rows={2}
+                          value={p}
+                          onChange={(e) =>
+                            handlePlatformChange(idx, e.target.value)
+                          }
+                          placeholder={`Platform entry #${idx + 1}...`}
+                          className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-12 ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
+                        />
+                        {(editingCandidate.platform || [""]).length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePlatform(idx)}
+                            className="absolute right-3 top-4 p-2 text-slate-300 hover:text-red-500 transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

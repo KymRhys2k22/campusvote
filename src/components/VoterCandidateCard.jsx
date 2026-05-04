@@ -8,10 +8,18 @@ import {
   X,
   Megaphone,
   Quote,
+  ChevronDown,
 } from "lucide-react";
 
 export default function CandidateCard({ candidate, selected }) {
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [expandedPlatforms, setExpandedPlatforms] = useState([]);
+
+  const togglePlatform = (index) => {
+    setExpandedPlatforms((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
+    );
+  };
   // Use a fallback image if image_url is not provided
   const hasImage = !!candidate.image_url;
 
@@ -29,7 +37,7 @@ export default function CandidateCard({ candidate, selected }) {
             <img
               src={candidate.image_url}
               alt={candidate.full_name}
-              className="object-top w-full h-full object-contain  transition-transform duration-700 group-hover:scale-110"
+              className="object-top w-full h-full object-cover  transition-transform duration-700 group-hover:scale-110"
             />
           ) : (
             <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
@@ -39,7 +47,7 @@ export default function CandidateCard({ candidate, selected }) {
         </div>
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-linear-to-t from-primary from-10%% via-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
 
         {/* Selection Checkmark */}
         {selected && (
@@ -67,11 +75,12 @@ export default function CandidateCard({ candidate, selected }) {
           <h3 className="text-shadow-lg text-2xl font-bold text-white mb-1.5 drop-shadow-sm tracking-tight">
             {candidate.full_name}
           </h3>
-          <p className="text-xs text-shadow-lg font-black text-white/80 uppercase tracking-[0.25em] mb-8">
-            "
-            {candidate.quotes && candidate.quotes.length > 40
-              ? `${candidate.quotes.substring(0, 40)}...`
-              : candidate.quotes || "Leadership through action."}
+          <p className="text-xs text-shadow-lg font-black text-white/80 tracking-[0.25em] mb-8">
+            <span className="line-clamp-3 wrap-break-word text-ellipsis">
+              {candidate.platform?.[0]?.length > 20
+                ? `${candidate.platform[0].substring(0, 20)}...`
+                : candidate.platform?.[0]}
+            </span>
           </p>
 
           {/* Buttons Row */}
@@ -96,14 +105,14 @@ export default function CandidateCard({ candidate, selected }) {
               className="absolute inset-0"
               onClick={() => setShowDetailModal(false)}
             />
-            <div className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
+            <div className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
               {/* Header / Hero */}
               <div className="relative h-64 shrink-0">
                 {hasImage ? (
                   <img
                     src={candidate.image_url}
                     alt={candidate.full_name}
-                    className="w-full h-full object-cover object-center md:object-top"
+                    className="w-full h-full object-cover object-top"
                   />
                 ) : (
                   <div className="w-full h-full bg-linear-to-br from-primary/30 to-primary/5 flex items-center justify-center">
@@ -162,51 +171,47 @@ export default function CandidateCard({ candidate, selected }) {
 
                   <div className="space-y-8">
                     <section>
-                      <div className="flex items-center gap-2 mb-3 text-primary">
-                        <Quote size={18} />
-                        <h4 className="text-xs font-black uppercase tracking-widest">
-                          Motto & Vision
-                        </h4>
-                      </div>
-                      <div className="p-6 bg-primary/5 rounded-4xl border border-primary/10 relative">
-                        <Quote
-                          size={40}
-                          className="absolute -top-4 -left-4 text-primary/10 rotate-180"
-                        />
-                        <p className="text-lg font-bold text-slate-700 italic leading-relaxed pt-2">
-                          "
-                          {candidate.quotes ||
-                            "Always ready to serve for the betterment of the student body."}
-                          "
-                        </p>
-                      </div>
+                      {candidate.platform?.map((platform, index) => {
+                        const isExpanded = expandedPlatforms.includes(index);
+                        return (
+                          <div key={index} className="border-b border-slate-100 last:border-none pb-4 last:pb-0">
+                            <button
+                              onClick={() => togglePlatform(index)}
+                              className="w-full flex mt-6 justify-between items-center gap-2 mb-3 text-primary hover:opacity-80 transition-opacity">
+                              <div className="flex items-center gap-2">
+                                <Megaphone size={18} />
+                                <h4 className="text-xs font-black uppercase tracking-widest">
+                                  Platform {index + 1}
+                                </h4>
+                              </div>
+                              <ChevronDown
+                                size={18}
+                                className={`transition-transform duration-300 ${
+                                  isExpanded ? "rotate-180" : ""
+                                }`}
+                              />
+                            </button>
+                            {isExpanded && (
+                              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <p className="text-sm text-slate-600 leading-relaxed font-medium whitespace-pre-line">
+                                  {platform}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </section>
-
-                    {candidate.platform && (
-                      <section>
-                        <div className="flex items-center gap-2 mb-3 text-primary">
-                          <Megaphone size={18} />
-                          <h4 className="text-xs font-black uppercase tracking-widest">
-                            Platforms
-                          </h4>
-                        </div>
-                        <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                          <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                            {candidate.platform}
-                          </p>
-                        </div>
-                      </section>
-                    )}
                   </div>
                 </div>
               </div>
 
               {/* Footer Action */}
-              <div className="p-8 border-t border-slate-100 shrink-0">
+              <div className="p-8 border-t border-slate-50 flex justify-center shrink-0">
                 <button
                   onClick={() => setShowDetailModal(false)}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-black py-4 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-widest text-sm active:scale-[0.98]">
-                  Close Details
+                  className="p-4 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-primary rounded-full transition-all active:scale-95 shadow-sm border border-slate-100">
+                  <ChevronDown size={24} />
                 </button>
               </div>
             </div>
