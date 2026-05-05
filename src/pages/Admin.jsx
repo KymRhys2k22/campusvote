@@ -84,24 +84,24 @@ export default function Admin() {
 
   const POSITIONS = [
     "President",
+    "President for Internal",
     "Vice President",
-    "Secretary",
-    "Assistant Secretary",
-    "Treasurer",
+    "Vice President for Internal",
+    "Vice President for External",
     "Chairman",
     "Chairwoman",
     "Vice Chairman",
     "Vice Chairwoman",
+    "Secretary",
+    "Assistant Secretary",
+    "Treasurer",
+    "Auditor",
+    "Public Information Officer",
+    "Protocol Officer",
     "Editor-in-Chief",
     "Associate Editor",
     "Managing Editor",
-    "President for Internal",
-    "Vice President for Internal",
-    "Vice President for External",
     "Public Relations Officer",
-    "Auditor",
-    "Protocol Officer",
-    "Public Information Officer",
     "Grade 12 Representative",
     "Pangulo",
     "Pangalawang Pangulo",
@@ -151,7 +151,7 @@ export default function Admin() {
       filename: `ATamHalalan_Election_Results_${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).replace(/,\s/g, "_").replace(/\s/g, "_")}.pdf`,
       method: "save",
       canvas: { useCORS: true, logging: false },
-      page: { margin: 10, format: "A4" },
+      page: { margin: 10, format: "legal" },
     });
   };
 
@@ -160,7 +160,7 @@ export default function Admin() {
       filename: `ATamHalalan_Full_Tallies_${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).replace(/,\s/g, "_").replace(/\s/g, "_")}.pdf`,
       method: "save",
       canvas: { useCORS: true, logging: false },
-      page: { margin: 10, format: "A4" },
+      page: { margin: 10, format: "legal" },
     });
   };
 
