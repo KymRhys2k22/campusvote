@@ -418,7 +418,7 @@ export default function ElectionBallot() {
                                 className={`ml-2 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${
                                   currentOrgSelections[position] === "abstain"
                                     ? "bg-red-500 text-white border-red-500 shadow-md"
-                                    : "bg-white text-slate-500 border-red-500 hover:border-red-500 hover:text-red-500"
+                                    : "bg-white text-red-600 border-red-500 hover:border-red-500 hover:text-red-500"
                                 }`}>
                                 Abstain
                               </button>

@@ -68,9 +68,9 @@ export default function VerticalCandidateCardList({
           </p>
 
           <p className="text-sm font-black text-black/80 tracking-[0.25em] mb-8">
-            <span className="line-clamp-3 wrap-break-word text-ellipsis">
+            <span className="line-clamp-3">
               {candidate.platform?.[0]?.length > 20
-                ? `${candidate.platform[0].substring(0, 30)}...`
+                ? `${candidate.platform[0].substring(0, 60)}...`
                 : candidate.platform?.[0]}
             </span>
           </p>

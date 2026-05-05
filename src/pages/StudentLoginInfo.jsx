@@ -502,7 +502,7 @@ function StudentLoginInfo() {
             <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-slate-50/50">
               <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
                 <img
-                  src="/data_privacy.png"
+                  src="/data_privacy.webp"
                   alt="Data Privacy Policy"
                   className="w-full h-auto rounded-lg"
                 />
