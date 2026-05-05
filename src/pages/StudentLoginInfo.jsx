@@ -6,6 +6,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  ShieldCheck,
+  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Divider from "../components/Divider";
@@ -22,6 +24,8 @@ function StudentLoginInfo() {
   const [error, setError] = useState("");
   const [isElectionOpen, setIsElectionOpen] = useState(true);
   const [fetchingToggle, setFetchingToggle] = useState(true);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [pendingStudent, setPendingStudent] = useState(null);
   const progressButtonBarRef = useRef(null);
   const containerRef = useRef(null);
   const headerRef = useRef(null);
@@ -193,24 +197,8 @@ function StudentLoginInfo() {
           return;
         }
 
-        // Insert into voted table as requested
-        const { error: insertError } = await supabase.from("voted").insert({
-          student_number: student.student_number,
-          email_address: student.email_address,
-        });
-
-        if (insertError) {
-          console.error("Error inserting to voted table:", insertError);
-          if (insertError.code === "23505") {
-            // unique constraint violation
-            setError("You have already voted.");
-            setLoading(false);
-            return;
-          }
-        }
-
-        setStudentData(student);
-        login(student);
+        setPendingStudent(student);
+        setShowPrivacyModal(true);
       } else {
         setError("Student not found. Please check your credentials.");
       }
@@ -218,6 +206,44 @@ function StudentLoginInfo() {
       console.error("Verification error:", err);
       setError(
         "Unable to connect to the verification server. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAgreePrivacy = async () => {
+    if (!pendingStudent) return;
+    setLoading(true);
+    try {
+      // Insert into voted table as requested
+      const { error: insertError } = await supabase.from("voted").insert({
+        student_number: pendingStudent.student_number,
+        email_address: pendingStudent.email_address,
+        data_privacy: "agree",
+      });
+
+      if (insertError) {
+        console.error("Error inserting to voted table:", insertError);
+        if (insertError.code === "23505") {
+          // unique constraint violation
+          setError("You have already voted.");
+          setShowPrivacyModal(false);
+          return;
+        }
+        setError(
+          `${insertError.message} (${insertError.details || "No details"})`,
+        );
+        return;
+      }
+
+      setStudentData(pendingStudent);
+      login(pendingStudent);
+      setShowPrivacyModal(false);
+    } catch (err) {
+      console.error("Privacy agreement error:", err);
+      setError(
+        err.message || "An unexpected error occurred. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -437,6 +463,70 @@ function StudentLoginInfo() {
           text={"Start Voting Session"}
           disabled={!studentData}
         />
+      )}
+
+      {/* Data Privacy Modal */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => !loading && setShowPrivacyModal(false)}
+          />
+
+          {/* Modal Container */}
+          <div className="relative w-full max-w-3xl bg-white rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-8 duration-500 border border-slate-200">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white sticky top-0 z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800 leading-none">
+                    Data Privacy Policy
+                  </h2>
+                  <p className="text-xs text-slate-400 font-medium mt-1 uppercase tracking-widest">
+                    Review and Consent
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => !loading && setShowPrivacyModal(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content (Scrollable) */}
+            <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-slate-50/50">
+              <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                <img
+                  src="/data_privacy.png"
+                  alt="Data Privacy Policy"
+                  className="w-full h-auto rounded-lg"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-slate-100 bg-white sticky bottom-0 z-10 flex flex-col sm:flex-row gap-3">
+              <button
+                disabled={loading}
+                onClick={handleAgreePrivacy}
+                className="flex-1 px-6 py-3.5 rounded-xl bg-accent text-slate-900 font-bold shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                {loading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <>
+                    I Agree and Consent
+                    <CheckCircle2 size={18} />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
